@@ -1,0 +1,25 @@
+html {
+    height: 100%;
+}
+
+@bg-color: hsl(240, 44%, 95%); /* Orig hsl(240, 44%, 45%); */
+/* @bg-col2 /* Orig hsl(240, 66%, 30%); */
+@bg-col2 : darken(saturate(@bg-color, 22%), 15%);
+
+body {
+    background: radial-gradient(ellipse at center, @bg-color 0%, @bg-col2 100%);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: 100%;
+    padding: 50px;
+    font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+    height: 100%;
+}
+
+a {
+  color: #00B7FF;
+}
+
+.navbar-brand .fa-book {
+    color: spin(@bg-col2, -30);
+}
