@@ -8,7 +8,7 @@ var loggedIn = function(req, res, next) {
         next();
     }
     else {
-        res.redirect('/login');
+        res.render("login.pug");
     }
 };
 
@@ -29,6 +29,38 @@ router.get('/', function(req, res, next) {
     else {
         res.render('shell', { title: req.app.get("title"), username: undefined });
     }
+});
+
+router.get('/addbook', loggedIn ,function(req, res, next) {
+    res.render("addbook.pug");
+});
+
+router.get('/allbooks', function(req, res, next) {
+    res.render("allbooks.pug");
+})
+
+router.get('/loginRtn', function(req, res, next) {
+    res.render("loginrtn.pug");
+});
+
+router.get('/logout', function(req, res, next) {
+    req.logout();
+    res.render('logout.pug');
+});
+
+// My Books
+router.get('/mybooks', loggedIn, function(req, res, next) {
+    res.render("mybooks.pug");
+})
+
+// Profile
+router.get('/profile', loggedIn, function(req, res, next) {
+    res.render("profile.pug");
+})
+
+// Splash page
+router.get('/splash', function(req, res, next) {
+    res.render('home');
 });
 
 router.get('/auth/twitter', function(req, res, next) {

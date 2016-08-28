@@ -4,13 +4,34 @@ html(lang="en")
         meta(chartset="utf-8")
         meta(name="viewport" content="width=device-width, initial-scale=1")
         title= title
-        link(href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css", rel="stylesheet", integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u", crossorigin="anonymous")
+        
+        //- jQuery (must be loaded before Bootstrap)
         script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js")
+        
+        //- Bootstrap
+        link(href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css", rel="stylesheet", integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u", crossorigin="anonymous")
         script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js", integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa", crossorigin="anonymous")
+        
+        
+        //- Angular, UI-Router, and ngAnimate
+        script(src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js")
+        script(src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular-animate.min.js")
+        script(type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.3.1/angular-ui-router.min.js")
+        
+        //- Font Awesome
         link(href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css", rel="stylesheet", integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1", crossorigin="anonymous")
+        
+        //- Google Fonts
+        link(href="https://fonts.googleapis.com/css?family=Gloria+Hallelujah|Indie+Flower" rel="stylesheet")
+        
+        //- Application-facing JS
+        script(src="/app.js")
+        script(src="/javascripts/client.js")
+        
+        //- Favicon + CSS
         link(rel="icon", href="/favicon.ico", type="image/x-icon")
         link(rel='stylesheet', href='/stylesheets/style.css')
-    body
+    body(ng-app="fcc-bp-booktc")
         div(class="container container-outer")
             header
                 nav(class="navbar navbar-default")
@@ -34,17 +55,23 @@ html(lang="en")
                                             u M
                                             |y Books
                                 li
-                                    a(data-ui-sref="all" accesskey="r") 
+                                    a(data-ui-sref="all" accesskey="a") 
                                         u A
                                         |ll Books
                             ul(class="nav navbar-nav navbar-right")
                                 if typeof username != 'undefined'
                                     li(id="li-add-new")
-                                        a(accesskey="n" ui-sref="addbook" id="add-new" title="New Pin")
+                                        a(accesskey="n" ui-sref="addbook" id="add-new" title="New Book")
                                             i(class="fa fa-plus-circle" display="inline !important" aria-hidden="true")
-                                            |&nbsp;Add 
+                                            |&nbsp;
                                             u N
                                             |ew Book
+                                    li(id="li-profile")
+                                        a(accesskey="p" ui-sref="profile" id="profile" title="Profile Preferences")
+                                            i(class="fa fa-user" display="inline !important" aria-hidden="true")
+                                            |&nbsp;
+                                            u P
+                                            |rofile
                                     li(id="li-sign-out" data-username=username)
                                         a(accesskey="s" ui-sref="logout" id="sign-out" title="Sign out")
                                             i(class="fa fa-sign-out" display="inline !important" aria-hidden="true")

@@ -1,0 +1,9 @@
+div Please wait...
+    script.
+        if (sessionStorage.getItem("preLoginPage") !== null) {
+            document.location.hash = sessionStorage.getItem("preLoginPage");
+            sessionStorage.removeItem("preLoginPage");
+        }
+        else {
+            document.location.hash = "";
+        }

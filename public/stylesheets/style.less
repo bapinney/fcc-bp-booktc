@@ -2,9 +2,10 @@ html {
     height: 100%;
 }
 
-@bg-color: hsl(240, 44%, 95%); /* Orig hsl(240, 44%, 45%); */
+@bg-color: hsl(220, 44%, 95%); /* Orig hsl(240, 44%, 45%); */
 /* @bg-col2 /* Orig hsl(240, 66%, 30%); */
-@bg-col2 : darken(saturate(@bg-color, 22%), 15%);
+@bg-col2: darken(saturate(@bg-color, 22%), 15%);
+@h1-color: darken(saturate(@bg-color, 22%), 65%);
 
 body {
     background: radial-gradient(ellipse at center, @bg-color 0%, @bg-col2 100%);
@@ -20,6 +21,98 @@ a {
   color: #00B7FF;
 }
 
+main {
+    background-color: whitesmoke;
+    border-radius: 8px;
+    box-shadow: inset 0px 0px 10px black;
+    margin-bottom: 20px; /* So the main container has a gap between it and the bottom of the page */
+    padding-bottom: 40px;
+}
+
+main.ng-enter {
+    /* transition on enter for .5s */
+    transition: 300ms;
+
+    /* start with opacity 0 (invisible) */
+    opacity: 0;
+}
+
+main.ng-enter-active {
+    opacity: 1;
+}
+
+.form_container input {
+    border-radius: 4px;
+    margin-left: 10px;
+}
+
+.img_mw_rwd {
+    max-width: 100%;
+    height: auto;
+}
+
+.navbar {
+    border-radius: 8px;
+    box-shadow: inset 0px 0px 10px black;
+}
+
+.navbar, .navbar-default {
+    border: none;
+}
+
 .navbar-brand .fa-book {
-    color: spin(@bg-col2, -30);
+    color: spin(@bg-col2, -180);
+}
+
+.navbar-nav>li {
+    transition: background-color 500ms;
+}
+
+.navKbSelect {
+    background-color: rgba(255, 255, 0, .2);
+    text-decoration: underline;
+}
+
+#book_preview {
+    border-radius: ~"20px / 15px";
+    border: 1px dotted black;
+    margin-bottom: 10px;
+    overflow: hidden;
+    height: 400px;
+    width: 300px;
+}
+
+#book_preview img {
+    display: block;
+    margin: auto auto;
+    max-height: 100%;
+    max-width: 100%;
+}
+
+#splash_img img {
+    border-radius:10px;
+    box-shadow: 0px 0px 5px 2px black;
+    margin: auto auto;
+    display: block;
+}
+
+#welcome {
+    color: @bg-col2;
+    text-transform: lowercase;
+    letter-spacing: .2em;
+    text-shadow: 0px 2px 4px rgba(0,0,0,0.4);
+}
+
+h1 {
+    color: @h1-color; /* 220, 66%, 30% */
+    font-family: 'Gloria Hallelujah', cursive;
+    text-transform: lowercase;
+    letter-spacing: .2em;
+    text-shadow: 0px 2px 4px rgba(0,0,0,.4);
+}
+
+h2 {
+    font-family: 'Gloria Hallelujah', cursive;
+    text-decoration: underline;
+    text-decoration-color: @h1-color;
 }
