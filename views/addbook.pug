@@ -3,7 +3,13 @@ div(ng-controller="addbook")
     div(id="book_preview")
         img(src="/images/moby dick.jpg")
     div(class="form_container")
+        div(id="add_instructions" class="instructions_text") Search for a book title, click on a result to preview,  then click Add Book to add a book
         label(for="title_input") Book 
             u T
             |itle
         input(type="text" id="title_input" name="title" accesskey="t" placeholder="Moby Dick")
+        button(class="fa fa-search search-button" id="search_button" ng-click="searchButtonClick()" accesskey="s")
+        br
+        label(for="isbn_select") Book Covers
+        br
+        select(disabled id="isbn_select")

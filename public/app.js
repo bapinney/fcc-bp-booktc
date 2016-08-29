@@ -59,24 +59,15 @@ ngApp.controller('allbooks', function($scope, $compile, $http) {
 
 ngApp.controller('addbook', function($scope, $compile, $http) {
     console.log("At allbooks");
-    var previewUpdateTimer;
-    
-    var updatePreview = function() {
-        console.log("uP called");
-    }
     
     //Gets fired on page change within app or when refreshed anew
     $scope.$on('$stateChangeSuccess', function() { 
-        console.log("%c At addbook $sCS!", "color:blue; font-size:20px");
-        $("#title_input").on("input", function() {
-            clearTimeout(previewUpdateTimer);
-            previewUpdateTimer = setTimeout(function() {
-                updatePreview()
-            }, 3000);
-        });
-        $("#title_input").focus();
-        
+        console.log("%c At addbook $sCS!", "color:blue; font-size:20px");    
     });
+    
+    $scope.searchButtonClick = function() {
+        console.log("ow!!!");
+    }
 });
 
 ngApp.controller('logout', function($scope, $http) {

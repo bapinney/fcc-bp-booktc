@@ -41,14 +41,31 @@ main.ng-enter-active {
     opacity: 1;
 }
 
+.disabled_input {
+    background-color: rgba(0,0,0,0.1);
+}
+
 .form_container input {
     border-radius: 4px;
     margin-left: 10px;
 }
 
+.form_container input[type=text] {
+    transition: background-color 500ms ease-in-out;
+}
+
+.form_container input[type=text]:focus {
+    background-color: hsl(160, 100%, 85%);
+}
+
 .img_mw_rwd {
     max-width: 100%;
     height: auto;
+}
+
+.instructions_text {
+    font-style: italic;
+    margin-bottom: 20px;
 }
 
 .navbar {
@@ -73,13 +90,21 @@ main.ng-enter-active {
     text-decoration: underline;
 }
 
+.search-button {
+    background-color: darkgreen;
+    border-radius: 4px;
+    border-width: 2px;
+    color: white;
+    font-size: 17px;
+}
+
 #book_preview {
     border-radius: ~"20px / 15px";
     border: 1px dotted black;
     margin-bottom: 10px;
     overflow: hidden;
-    height: 400px;
-    width: 300px;
+    max-height: 200px;
+    max-width: 150px;
 }
 
 #book_preview img {
@@ -87,6 +112,11 @@ main.ng-enter-active {
     margin: auto auto;
     max-height: 100%;
     max-width: 100%;
+}
+
+#isbn_select {
+    transition: background-color 500ms;
+    width: 300px;
 }
 
 #splash_img img {
@@ -115,4 +145,8 @@ h2 {
     font-family: 'Gloria Hallelujah', cursive;
     text-decoration: underline;
     text-decoration-color: @h1-color;
+}
+
+select {
+    box-shadow: 2px 2px 2px black;
 }
