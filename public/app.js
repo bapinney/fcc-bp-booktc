@@ -1,4 +1,5 @@
 console.log("%capp.js loaded","background-color:darkgreen; color:white; font-size:12px")
+var gBooksURI = "https://www.googleapis.com/books/v1/volumes?q=";
 
 var ngApp = angular.module('fcc-bp-booktc', ['ui.router', 'ngAnimate']);
 ngApp.config(function ($stateProvider, $urlRouterProvider) {
@@ -57,6 +58,24 @@ ngApp.controller('allbooks', function($scope, $compile, $http) {
     });
 });
 
+ngApp.directive('dlEnter', function() {
+    return function(scope, element, attributes) {
+        //Bind the event to that element
+        element.bind("keydown keypress", function(event) {
+            var keyCode = event.which || event.keyCode; //Save the value of the one that isn't null
+            
+            if (keyCode === 13) {// Enterkey
+                console.log("Enter key was pressed! :D");
+                scope.$apply(function() {
+                    scope.$eval(attributes.dlEnter);
+                });
+                
+                event.preventDefault(); //Don't let the UA do anything else on this event...
+            }
+        })
+    }
+})
+
 ngApp.controller('addbook', function($scope, $compile, $http) {
     console.log("At allbooks");
     
@@ -65,8 +84,72 @@ ngApp.controller('addbook', function($scope, $compile, $http) {
         console.log("%c At addbook $sCS!", "color:blue; font-size:20px");    
     });
     
+    $scope.updateResultsList = function() {
+        console.log("Update results list called...");
+        console.dir($scope.queryResult);
+    }
+    
     $scope.searchButtonClick = function() {
-        console.log("ow!!!");
+        console.log("Search button clicked...");
+        if ($("#status_text").hasClass("status_text_error")) {
+            console.log("Removing status_text_error");
+            $("#status_text").removeClass("status_text_error");
+        }
+        console.log("Adding UI feedback to button...");
+        $("#search_button").addClass("searching-indicator");
+        var searchQuery = $("#title_input")[0].value;
+        console.log(`SearchQuery is ${searchQuery}`);
+        var queryURI = gBooksURI + encodeURIComponent(searchQuery);
+        console.log(`queryURI is ${queryURI}`);
+        $("#status_text").text("Searching for books...");
+        
+        /*
+        $http.get(queryURI)
+        .success(function(data, status, headers, config) {
+            $scope.validDataReturned = true;
+            $scope.queryResult = data;
+            $("#status_text").text("");
+            $scope.updateResultsList();
+        })
+        .error(function(data, status, headers, config) {
+            $scope.validDataReturned = false;
+            $scope.queryResult = null;
+            $("#status_text").addClass("status_text_error");
+            if (data.hasOwnProperty("error") && data.error.hasOwnProperty("message")) {
+                $("#status_text").text("Error: " + data.error.message);
+            }
+            else {
+                $("#status_text").text("An error has occurred");
+            }
+        })
+        */
+        
+        /* Just so I don't forget... The $http legacy promise methods success and error have been deprecated. Use the standard "then" method instead. */
+        
+        $http.get(queryURI)
+        .then(function(response) {
+            console.dir(response);
+            if (response.data.hasOwnProperty("items")) {
+                console.log("We have items!!!");
+                console.log(response.data.items.length);
+            }
+            else {
+                console.log("No results returned");
+                $("#status_text").addClass("status_text_error");
+                $("#status_text").text("Error: " + response.data.error.message);
+            }
+        }, function(response) {
+            console.dir(response);
+            if (response.data.error.message.length > 0) {
+                $("#status_text").addClass("status_text_error");
+                $("#status_text").text("Error: " + response.data.error.message);
+            }
+            else {
+                $("#status_text").addClass("status_text_error");
+                $("#status_text").text("An error occurred while querying for data");
+            }
+        });
+        
     }
 });
 

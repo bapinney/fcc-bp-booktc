@@ -7,9 +7,13 @@ div(ng-controller="addbook")
         label(for="title_input") Book 
             u T
             |itle
-        input(type="text" id="title_input" name="title" accesskey="t" placeholder="Moby Dick")
+        input(type="text" id="title_input" name="title" accesskey="t" placeholder="Moby Dick" dl-enter="searchButtonClick()")
         button(class="fa fa-search search-button" id="search_button" ng-click="searchButtonClick()" accesskey="s")
         br
+        div(class="status_text" id="status_text") &nbsp;
         label(for="isbn_select") Book Covers
         br
         select(disabled id="isbn_select")
+        button(class="add-button" disabled id="add_book_button")
+            i(class="fa fa-book icon-margin")
+            |Add Book

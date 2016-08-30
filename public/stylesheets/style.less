@@ -41,6 +41,20 @@ main.ng-enter-active {
     opacity: 1;
 }
 
+.add-button {
+    background-color: darkgreen;
+    border-radius: 4px;
+    border-width: 2px;
+    color: white;
+    font-family: "Lucida Grande",Helvetica,Arial,sans-serif;
+    font-size: 17px;
+}
+
+.add-button:disabled {
+    background-color: darkgrey;
+    color: grey;
+}
+
 .disabled_input {
     background-color: rgba(0,0,0,0.1);
 }
@@ -55,7 +69,11 @@ main.ng-enter-active {
 }
 
 .form_container input[type=text]:focus {
-    background-color: hsl(160, 100%, 85%);
+    background-color: hsl(60, 67%, 80%);
+}
+
+.icon-margin {
+    margin-right: 8px;
 }
 
 .img_mw_rwd {
@@ -96,6 +114,24 @@ main.ng-enter-active {
     border-width: 2px;
     color: white;
     font-size: 17px;
+    transition: background-color 500ms ease-in-out;
+}
+
+/* Keep this below .search-button */
+.searching-indicator {
+    background-color: darkblue;
+}
+
+.status_text {
+    cursor: default;
+    font-style: italic;
+    opacity: 0.25;
+    user-select: none;
+}
+
+.status_text_error {
+    color: red;
+    opacity: 1;
 }
 
 #book_preview {
@@ -115,6 +151,8 @@ main.ng-enter-active {
 }
 
 #isbn_select {
+    display: block;
+    margin-bottom: 10px;
     transition: background-color 500ms;
     width: 300px;
 }
@@ -124,6 +162,10 @@ main.ng-enter-active {
     box-shadow: 0px 0px 5px 2px black;
     margin: auto auto;
     display: block;
+}
+
+#status_text:after {
+    content: "\00a0"; /* Prevents empty space from being collapsed */
 }
 
 #welcome {
