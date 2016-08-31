@@ -1,6 +1,8 @@
+var chalk = require('chalk');
 var express = require('express');
 var passport = require('passport');
 var router = express.Router();
+var User = require('../models/user.js');
 
 //Login check
 var loggedIn = function(req, res, next) {
@@ -55,6 +57,9 @@ router.get('/mybooks', loggedIn, function(req, res, next) {
 
 // Profile
 router.get('/profile', loggedIn, function(req, res, next) {
+    console.log(chalk.cyan("At profile..."));
+    User.findOne()
+    
     res.render("profile.pug");
 })
 

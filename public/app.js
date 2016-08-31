@@ -81,12 +81,22 @@ ngApp.controller('addbook', function($scope, $compile, $http) {
     
     //Gets fired on page change within app or when refreshed anew
     $scope.$on('$stateChangeSuccess', function() { 
-        console.log("%c At addbook $sCS!", "color:blue; font-size:20px");    
+        console.log("%c At addbook $sCS!", "color:blue");
+        $("#title_input").focus();
     });
     
     $scope.updateResultsList = function() {
         console.log("Update results list called...");
-        console.dir($scope.queryResult);
+        console.dir($scope.searchResults);
+        for (i=0; i < $scope.searchResults.items.length; i++) {
+            var title = $scope.searchResults.items[i].volumeInfo;
+            console.dir(title);
+            var option = document.createElement("option");
+            option.text = $scope.searchResults.items[i].volumeInfo.title;
+            $("#book_select")[0].add(option);
+            console.log(`Book i is ${i}`);
+        }
+        $("#book_select")[0].disabled = false;
     }
     
     $scope.searchButtonClick = function() {
@@ -102,28 +112,7 @@ ngApp.controller('addbook', function($scope, $compile, $http) {
         var queryURI = gBooksURI + encodeURIComponent(searchQuery);
         console.log(`queryURI is ${queryURI}`);
         $("#status_text").text("Searching for books...");
-        
-        /*
-        $http.get(queryURI)
-        .success(function(data, status, headers, config) {
-            $scope.validDataReturned = true;
-            $scope.queryResult = data;
-            $("#status_text").text("");
-            $scope.updateResultsList();
-        })
-        .error(function(data, status, headers, config) {
-            $scope.validDataReturned = false;
-            $scope.queryResult = null;
-            $("#status_text").addClass("status_text_error");
-            if (data.hasOwnProperty("error") && data.error.hasOwnProperty("message")) {
-                $("#status_text").text("Error: " + data.error.message);
-            }
-            else {
-                $("#status_text").text("An error has occurred");
-            }
-        })
-        */
-        
+                
         /* Just so I don't forget... The $http legacy promise methods success and error have been deprecated. Use the standard "then" method instead. */
         
         $http.get(queryURI)
@@ -131,12 +120,18 @@ ngApp.controller('addbook', function($scope, $compile, $http) {
             console.dir(response);
             if (response.data.hasOwnProperty("items")) {
                 console.log("We have items!!!");
+                //Hide the status text...
+                $("#status_text").text("");
                 console.log(response.data.items.length);
+                console.log("Setting $scope.searchResults to response.data");
+                $scope.searchResults = response.data;
+                console.log("Calling updateResultsList...");
+                $scope.updateResultsList();
             }
-            else {
+            else { //Not an error, but no results returned.  There sill not be a response.data.error.message, as this is not an error but simply just no results...
                 console.log("No results returned");
                 $("#status_text").addClass("status_text_error");
-                $("#status_text").text("Error: " + response.data.error.message);
+                $("#status_text").text("Error: No results returned");
             }
         }, function(response) {
             console.dir(response);

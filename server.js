@@ -161,61 +161,6 @@ app.use(function(err, req, res, next) {
   });
 });
 
-passport.use(new TwitterStrategy({
-        consumerKey: TWITTER_CONSUMER_KEY,
-        consumerSecret: TWITTER_CONSUMER_SECRET,
-        callbackURL: CALLBACK_URI,
-        passReqToCallback: true //Allows stuff like username to be in the req
-    },
-    function (req, token, tokenSecret, profile, callback) {
-        /*  Properties we care about:
-            id, token, name, screen_name, location, description
-            All but ID are strings */
-
-        process.nextTick(function () { //Asynchronous
-
-            //Find or Create
-            console.log(chalk.bgBlack.yellow("Searching for user ID ") + profile.id);
-            User.findOne({
-                    provider: "twitter",
-                    id      : profile.id
-                },
-                function (err, user) {
-                    console.log(chalk.bgBlack.yellow("User callback"));
-                    if (err) {
-                        console.log(chalk.bgBlack.red("Error: " + err));
-                        callback(err);
-                    }
-                    if (user) { //We found the user
-                        console.log(chalk.bgBlack.green("User found"));
-                        return callback(null, user);
-                    } else { //User does not exist
-                        console.log(chalk.bgWhite.black("User does not exist, yet"));
-                        var newUser = new User({
-                            provider    : "twitter",
-                            id          : profile.id,
-                            token       : token,
-                            username    : profile.username
-                            }
-                        );
-                        //Since newUser is a Mongoose schema from User, it has its own save method
-                        console.log("About to save user: ");
-                        newUser.save(function(err, newUser, numAffected) {
-                            if (err) {
-                                console.log("Error when saving new user: ");
-                                console.error(err);
-                            }
-                            console.log("Num affected: " + numAffected);
-                            return callback(null, newUser);
-                        });
-                    }
-                }
-            ); 
-        });
-    })
-);
-
-
 console.log(chalk.bgYellow.black("Setting promiseLibrary to Bluebird and connecting to MongoDB..."));
 var mongooseOpts = {
     // http://mongoosejs.com/docs/promises.html#promises-for-the-mongodb-driver

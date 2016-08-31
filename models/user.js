@@ -11,7 +11,13 @@ var userSchema = new Schema({
     provider    : String,
     id          : Number,
     token       : String,
-    username    : String
+    username    : String,
+    profile     : {
+        fullname    : { type: String, default: null },
+        city        : { type: String, default: null },
+        state       : { type: String, default: null }
+    }
+    
     },
     {collection: 'fccbooktc-users'}
 );
