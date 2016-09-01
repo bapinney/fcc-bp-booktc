@@ -12,7 +12,7 @@ div(ng-controller="addbook")
         br
         div(class="status_text" id="status_text") &nbsp;
         label(for="book_select") Book Covers
-        select(disabled id="book_select" size="5")
+        select(disabled id="book_select" size="5" ng-change="updateCoverPreview()" ng-model="selectedBook")
         button(class="add-button" disabled id="add_book_button")
             i(class="fa fa-book icon-margin")
             |Add Book

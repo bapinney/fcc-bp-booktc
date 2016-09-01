@@ -82,22 +82,9 @@ ngApp.controller('addbook', function($scope, $compile, $http) {
     //Gets fired on page change within app or when refreshed anew
     $scope.$on('$stateChangeSuccess', function() { 
         console.log("%c At addbook $sCS!", "color:blue");
+        //Sets focus to the Book Title INPUT, the first input on this page
         $("#title_input").focus();
     });
-    
-    $scope.updateResultsList = function() {
-        console.log("Update results list called...");
-        console.dir($scope.searchResults);
-        for (i=0; i < $scope.searchResults.items.length; i++) {
-            var title = $scope.searchResults.items[i].volumeInfo;
-            console.dir(title);
-            var option = document.createElement("option");
-            option.text = $scope.searchResults.items[i].volumeInfo.title;
-            $("#book_select")[0].add(option);
-            console.log(`Book i is ${i}`);
-        }
-        $("#book_select")[0].disabled = false;
-    }
     
     $scope.searchButtonClick = function() {
         console.log("Search button clicked...");
@@ -146,6 +133,40 @@ ngApp.controller('addbook', function($scope, $compile, $http) {
         });
         
     }
+    
+    $scope.updateCoverPreview = function() {
+        console.log("Update cover preview called!");
+        console.dir($scope);
+        if (!$scope.hasOwnProperty("selectedBook")) {
+            console.error("%cExpected $scope to have property 'selectedBook'.", "background-color:black; color:red; font-size:12px");
+            return false;
+        }
+        if (isNaN(Number($scope.selectedBook))) {
+            console.error("%cUnabled to cast 'selectedBook' to Number.", "background-color:black; color:red; font-size:12px");
+            return false;
+        }
+        var selectedBookIndex = Number($scope.selectedBook);
+        console.log(selectedBookIndex);
+    }
+    
+    $scope.updateResultsList = function() {
+        console.log("Update results list called...");
+        console.log("Clearing previous results, if any...");
+        $("#book_select").empty();
+        console.dir($scope);
+        console.dir($scope.searchResults);
+        for (i=0; i < $scope.searchResults.items.length; i++) {
+            var title = $scope.searchResults.items[i].volumeInfo;
+            console.dir(title);
+            var option = document.createElement("option");
+            option.text = $scope.searchResults.items[i].volumeInfo.title;
+            option.value = i;
+            $("#book_select")[0].add(option);
+            //console.log(`Book i is ${i}`);
+        }
+        $("#book_select")[0].disabled = false;
+    }
+    
 });
 
 ngApp.controller('logout', function($scope, $http) {
