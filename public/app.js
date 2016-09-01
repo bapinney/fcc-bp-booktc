@@ -79,10 +79,14 @@ ngApp.directive('dlEnter', function() {
 ngApp.controller('addbook', function($scope, $compile, $http) {
     console.log("At allbooks");
     
+    //Use the ol' Moby Dick book cover as a placeholder, until the end-user clicks on a book title to preview
+    $scope.img2use = "/images/moby dick.jpg";
+    
     //Gets fired on page change within app or when refreshed anew
     $scope.$on('$stateChangeSuccess', function() { 
         console.log("%c At addbook $sCS!", "color:blue");
         //Sets focus to the Book Title INPUT, the first input on this page
+        
         $("#title_input").focus();
     });
     
@@ -135,8 +139,6 @@ ngApp.controller('addbook', function($scope, $compile, $http) {
     }
     
     $scope.updateCoverPreview = function() {
-        console.log("Update cover preview called!");
-        console.dir($scope);
         if (!$scope.hasOwnProperty("selectedBook")) {
             console.error("%cExpected $scope to have property 'selectedBook'.", "background-color:black; color:red; font-size:12px");
             return false;
@@ -147,6 +149,9 @@ ngApp.controller('addbook', function($scope, $compile, $http) {
         }
         var selectedBookIndex = Number($scope.selectedBook);
         console.log(selectedBookIndex);
+        console.dir($scope.searchResults.items[selectedBookIndex]);
+        var img2use = $scope.searchResults.items[selectedBookIndex].volumeInfo.imageLinks.thumbnail;
+        $scope.img2use = img2use;
     }
     
     $scope.updateResultsList = function() {
@@ -156,13 +161,14 @@ ngApp.controller('addbook', function($scope, $compile, $http) {
         console.dir($scope);
         console.dir($scope.searchResults);
         for (i=0; i < $scope.searchResults.items.length; i++) {
-            var title = $scope.searchResults.items[i].volumeInfo;
-            console.dir(title);
+            var title = $scope.searchResults.items[i].volumeInfo.title;
             var option = document.createElement("option");
-            option.text = $scope.searchResults.items[i].volumeInfo.title;
+            
+            option.text = title;
+            
+            //So we have a reference, using our ngModel, on what the user selected...
             option.value = i;
             $("#book_select")[0].add(option);
-            //console.log(`Book i is ${i}`);
         }
         $("#book_select")[0].disabled = false;
     }

@@ -1,7 +1,7 @@
 h1 Add book
 div(ng-controller="addbook")
     div(id="book_preview")
-        img(src="/images/moby dick.jpg")
+        img(ng-src="{{img2use}}")
     div(class="form_container")
         div(id="add_instructions" class="instructions_text") Search for a book title, click on a result to preview,  then click Add Book to add a book
         label(for="title_input") Book 
