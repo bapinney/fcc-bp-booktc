@@ -52,10 +52,33 @@ ngApp.config(function ($stateProvider, $urlRouterProvider) {
 
 ngApp.controller('allbooks', function($scope, $compile, $http) {
     console.log("At all!books");
+    $scope.pollingCompleted = false;
+    $scope.error = false;
+    $scope.statusMessage = "Loading data 123...";
     $scope.$on('$stateChangeSuccess', function() { 
-        console.log("%c At allbooks!", "color:blue; font-size:20px");
-        
+        console.log("%c At allbooks $sCS!", "color:blue; font-size:16px");
+        var grid = angular.element("#book-grid");
+        console.log("Polling for all books...");
+        $.ajax({
+            method: "POST",
+            url: "getbooks",
+            data: { page: 0, limit: 30}
+        }).done(function(data) {
+            console.log("Setting pollingCompleted to true...");
+            $scope.pollingCompleted = true;
+            $scope.error = true;
+            $scope.statusMessage = "Should be red, because I purposely set error to true...";
+            console.log("updated status message2");
+            console.dir(data);
+            $scope.displayBooks();
+        })
     });
+    
+    $scope.displayBooks = function() {
+        $scope.$apply();  //Updates the view and what we see...
+        console.log("Display books called3");
+        
+    }
 });
 
 ngApp.directive('dlEnter', function() {
@@ -79,16 +102,26 @@ ngApp.directive('dlEnter', function() {
 ngApp.controller('addbook', function($scope, $compile, $http) {
     console.log("At allbooks");
     
+    $scope.add_disabled = true; //Keep the button disabled at the start
+    $scope.book = {};
+    
     //Use the ol' Moby Dick book cover as a placeholder, until the end-user clicks on a book title to preview
-    $scope.img2use = "/images/moby dick.jpg";
+    $scope.book.img2use = "/images/moby dick.jpg";
     
     //Gets fired on page change within app or when refreshed anew
     $scope.$on('$stateChangeSuccess', function() { 
         console.log("%c At addbook $sCS!", "color:blue");
         //Sets focus to the Book Title INPUT, the first input on this page
         
-        $("#title_input").focus();
+        angular.element("#title_input").focus();
     });
+    
+    /**
+     * Dummy function used to prevent default event responses.  Used in SELECT to prevent the enter key from causing a form submit
+     */
+    $scope.preventDefault = function() {
+        console.log("At pD");
+    }
     
     $scope.searchButtonClick = function() {
         console.log("Search button clicked...");
@@ -98,6 +131,8 @@ ngApp.controller('addbook', function($scope, $compile, $http) {
         }
         console.log("Adding UI feedback to button...");
         $("#search_button").addClass("searching-indicator");
+        console.log("Disabling the Add Book button, in case this is a secondary search...");
+        $scope.add_disabled = true;
         var searchQuery = $("#title_input")[0].value;
         console.log(`SearchQuery is ${searchQuery}`);
         var queryURI = gBooksURI + encodeURIComponent(searchQuery);
@@ -124,6 +159,7 @@ ngApp.controller('addbook', function($scope, $compile, $http) {
                 $("#status_text").addClass("status_text_error");
                 $("#status_text").text("Error: No results returned");
             }
+            angular.element("#book_select").focus();
         }, function(response) {
             console.dir(response);
             if (response.data.error.message.length > 0) {
@@ -139,25 +175,39 @@ ngApp.controller('addbook', function($scope, $compile, $http) {
     }
     
     $scope.updateCoverPreview = function() {
-        if (!$scope.hasOwnProperty("selectedBook")) {
+        //console.dir($scope);
+        if (!$scope.hasOwnProperty("book")) {
+            console.error("Expected $scope to have property book");
+            return false;
+        }
+        if (!$scope.book.hasOwnProperty("selectedBook")) {
             console.error("%cExpected $scope to have property 'selectedBook'.", "background-color:black; color:red; font-size:12px");
             return false;
         }
-        if (isNaN(Number($scope.selectedBook))) {
+        if (isNaN(Number($scope.book.selectedBook))) {
             console.error("%cUnabled to cast 'selectedBook' to Number.", "background-color:black; color:red; font-size:12px");
             return false;
         }
-        var selectedBookIndex = Number($scope.selectedBook);
-        console.log(selectedBookIndex);
-        console.dir($scope.searchResults.items[selectedBookIndex]);
-        var img2use = $scope.searchResults.items[selectedBookIndex].volumeInfo.imageLinks.thumbnail;
-        $scope.img2use = img2use;
+        var selectedBookIndex = Number($scope.book.selectedBook);
+        
+        $scope.add_disabled = false;
+        angular.element("#book_preview").addClass("book_shadow");
+        
+                
+        if (typeof $scope.searchResults.items[selectedBookIndex].volumeInfo.imageLinks !== "undefined") {
+            var img2use = $scope.searchResults.items[selectedBookIndex].volumeInfo.imageLinks.thumbnail;
+            $scope.book.img2use = img2use;
+            $scope.book.title = $scope.searchResults.items[selectedBookIndex].volumeInfo.title;
+        }
+        else {
+            $scope.book.img2use = "/images/hand-holding-book.jpg";
+        }
     }
     
     $scope.updateResultsList = function() {
         console.log("Update results list called...");
         console.log("Clearing previous results, if any...");
-        $("#book_select").empty();
+        angular.element("#book_select").empty();
         console.dir($scope);
         console.dir($scope.searchResults);
         for (i=0; i < $scope.searchResults.items.length; i++) {
@@ -168,9 +218,37 @@ ngApp.controller('addbook', function($scope, $compile, $http) {
             
             //So we have a reference, using our ngModel, on what the user selected...
             option.value = i;
-            $("#book_select")[0].add(option);
+            angular.element("#book_select")[0].add(option);
         }
         $("#book_select")[0].disabled = false;
+    }
+    
+    
+    
+    $scope.addBook = function() {
+        console.dir($scope);
+        $scope.resultError = undefined;
+        var abBtn = angular.element("#add_book_button");
+        $scope.add_disabled = true; //Disable the button to prevent duplicatation...
+        abBtn.removeClass("add-button").addClass("adding-button").text("adding...");
+        
+        var book = {title: $scope.book.title,
+                   image: $scope.book.img2use
+                   }
+        
+        $http({method: 'POST',
+              url: '/addnewbook',
+             data: book})
+        .then(function(response) {
+            if (response.data.status == "added") {
+                console.log("Book added!")
+            }
+        }, function(response) { //Error
+            console.log("At error");
+            $scope.resultError = true;
+            $scope.resultErrorMessage = "idk, my bff Jill?";
+            window.alert("There was an error processing your request: " + response.data);
+        });
     }
     
 });
@@ -188,6 +266,35 @@ ngApp.controller('mybooks', function($scope, $compile, $http) {
         console.log("%c At mybooks!", "color:blue; font-size:20px");
 
     });
+});
+
+ngApp.controller('profile', function($scope, $http) {
+   console.log("Inside profile controller");
+    $scope.$on('$stateChangeSuccess', function() {
+        angular.element("#form_name").focus();
+    });
+    
+    $scope.updateProfile = function() {
+        console.log("updateProfile called!");
+        console.dir($scope);
+        
+        var data = {
+            fullname: $scope.fullname,
+            city:     $scope.city,
+            state:    $scope.state
+        }
+        
+        
+        var config = {
+            headers : {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
+            }
+        };
+        
+        angular.element("#form_button").removeClass("btn-success").addClass("btn-info").text("Updating...");
+        $http.post("updateProfile", data)
+    }
+    
 });
 
 $(function() { //Document ready

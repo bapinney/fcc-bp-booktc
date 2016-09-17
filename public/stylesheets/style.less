@@ -31,7 +31,7 @@ main {
 
 main.ng-enter {
     /* transition on enter for .5s */
-    transition: 300ms;
+    transition: all 500ms ease-in-out;
 
     /* start with opacity 0 (invisible) */
     opacity: 0;
@@ -42,17 +42,45 @@ main.ng-enter-active {
 }
 
 .add-button {
-    background-color: darkgreen;
-    border-radius: 4px;
-    border-width: 2px;
+    background-color: hsl(120, 100%, 20%);
     color: white;
-    font-family: "Lucida Grande",Helvetica,Arial,sans-serif;
-    font-size: 17px;
 }
 
 .add-button:disabled {
     background-color: darkgrey;
     color: grey;
+}
+
+.add-button:enabled {
+    box-shadow: 0 -1px 3px 4px hsla(54,95%,52%,.5);
+}
+
+.add-button:enabled:hover {
+    background-color: hsl(80, 61%, 50%);;
+    border-color: hsl(80, 61%, 50%);;
+    box-shadow: 0 -1px 3px 4px hsla(80, 61%, 50%, .5);
+}
+
+.added-button:disabled {
+    background-color: hsl(120, 61%, 25%);
+    border-color: hsl(120, 61%, 25%);
+    box-shadow: 0 -1px 3px 4px hsla(120, 61%, 25%, .5);
+}
+
+.adding-button:disabled {
+    background-color: hsl(240, 61%, 25%);
+    border-color: hsl(240, 61%, 25%);
+    box-shadow: 0 0 1px 1px hsla(240, 61%, 25%, .5);
+    color: white;
+    font-style: italic;
+}
+
+.add-error-button:disabled {
+    background-color: hsl(0, 61%, 50%);
+    border-color: hsl(0, 61%, 50%);
+    box-shadow: 0 0 1px 1px hsla(0, 61%, 50%, .5);
+    color: white;
+    font-style: italic;
 }
 
 .disabled_input {
@@ -151,6 +179,25 @@ main.ng-enter-active {
     opacity: 1;
 }
 
+#add_book_button {
+    border-radius: 4px;
+    border-width: 2px;
+    font-family: "Lucida Grande",Helvetica,Arial,sans-serif;
+    font-size: 17px;
+    margin-top: 8px;
+    transition: all 500ms ease-in-out;
+}
+
+#book_grid {
+    border: 6px solid black;
+    border-radius: 10px;
+}
+
+#book_preview.book_shadow {
+    border: 1px solid black;
+    box-shadow: 6px 6px 1px rgb(200,200,200);
+}
+
 #book_preview {
     border-radius: ~"20px / 15px";
     border: 1px dotted black;
@@ -165,6 +212,10 @@ main.ng-enter-active {
     margin: auto auto;
     max-height: 100%;
     max-width: 100%;
+}
+
+#form_button {
+    transition: all 500ms ease-in-out;
 }
 
 #splash_img img {
@@ -202,4 +253,16 @@ h2 {
 
 select {
     box-shadow: 2px 2px 2px black;
+}
+
+select::-webkit-scrollbar {
+    background-color: @bg-color;
+    -webkit-appearance: none;
+    width: 10px;
+}
+
+select::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background-color: @bg-col2;
+    box-shadow: 10px 10px 10px rgba(255,255,255,.5);
 }

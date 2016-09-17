@@ -1,1 +1,4 @@
 h1 All Books
+div(ng-controller="allbooks")
+    div(id="status_text" ng-class="{status_text_error : error === true, status_text: error === false}" ng-show="!pollingCompleted || error") {{statusMessage}}
+    div(id="book_grid" ng-show="pollingCompleted")

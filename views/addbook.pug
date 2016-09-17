@@ -1,18 +1,24 @@
 h1 Add book
 div(ng-controller="addbook")
     div(id="book_preview")
-        img(ng-src="{{img2use}}")
+        img(id="book_cover" ng-model="bookCover" ng-src="{{book.img2use}}")
     div(class="form_container")
         div(id="add_instructions" class="instructions_text") Search for a book title, click on a result to preview,  then click Add Book to add a book
-        label(for="title_input") Book 
-            u T
-            |itle
-        input(type="text" id="title_input" name="title" accesskey="t" placeholder="Moby Dick" dl-enter="searchButtonClick()")
-        button(class="fa fa-search search-button" id="search_button" ng-click="searchButtonClick()" accesskey="s")
-        br
-        div(class="status_text" id="status_text") &nbsp;
-        label(for="book_select") Book Covers
-        select(disabled id="book_select" size="5" ng-change="updateCoverPreview()" ng-model="selectedBook")
-        button(class="add-button" disabled id="add_book_button")
-            i(class="fa fa-book icon-margin")
-            |Add Book
+        form(name="addBook_form" ng-submit="addBook()")
+            label(for="title_input") Book 
+                u T
+                |itle
+            input(type="text" id="title_input" name="title" accesskey="t" placeholder="Moby Dick" dl-enter="searchButtonClick()" ng-model="book.searchTitle")
+            button(class="fa fa-search search-button" id="search_button" ng-click="searchButtonClick()" accesskey="s")
+            br
+            div(class="status_text" id="status_text") &nbsp;
+            label(for="book_select") Book 
+                u C
+                |overs
+            select(disabled id="book_select" accesskey="c" size="5" dl-enter="preventDefault()" ng-model="book.selectedBook" ng-change="updateCoverPreview()")
+            button(class="add-button" ng-disabled="add_disabled" ng-model="add_book_button" id="add_book_button" accesskey="d")
+                i(class="fa fa-book icon-margin")
+                |A
+                u d
+                |d Book
+            div(ng-show="resultError") {{resultErrorMessage}}
