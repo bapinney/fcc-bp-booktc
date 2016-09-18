@@ -83,6 +83,20 @@ main.ng-enter-active {
     font-style: italic;
 }
 
+.book {
+    border: 1px dotted blue;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    height: 175px;
+    width: 125px;
+    margin: 5px;
+}
+
+.book img {
+    height: 100%;
+}
+
 .disabled_input {
     background-color: rgba(0,0,0,0.1);
 }
@@ -189,12 +203,13 @@ main.ng-enter-active {
 }
 
 #book_grid {
-    border: 6px solid black;
+    border: 2px inset @bg-col2;
     border-radius: 10px;
+    padding: 10px;
 }
 
 #book_preview.book_shadow {
-    border: 1px solid black;
+    border: 3px groove black;
     box-shadow: 6px 6px 1px rgb(200,200,200);
 }
 
@@ -216,6 +231,16 @@ main.ng-enter-active {
 
 #form_button {
     transition: all 500ms ease-in-out;
+}
+
+#next_button {
+    display: inline block;
+    float: right;
+}
+
+#prev_button {
+    display: inline-block;
+    float: left;
 }
 
 #splash_img img {

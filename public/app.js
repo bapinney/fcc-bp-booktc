@@ -59,26 +59,37 @@ ngApp.controller('allbooks', function($scope, $compile, $http) {
         console.log("%c At allbooks $sCS!", "color:blue; font-size:16px");
         var grid = angular.element("#book-grid");
         console.log("Polling for all books...");
-        $.ajax({
-            method: "POST",
+      
+        var req = {
+            method: 'POST',
             url: "getbooks",
             data: { page: 0, limit: 30}
-        }).done(function(data) {
-            console.log("Setting pollingCompleted to true...");
-            $scope.pollingCompleted = true;
-            $scope.error = true;
-            $scope.statusMessage = "Should be red, because I purposely set error to true...";
-            console.log("updated status message2");
-            console.dir(data);
-            $scope.displayBooks();
-        })
+        };
+        
+        $http(req).then(
+            function(res) { //Success function
+                console.log("Setting pollingCompleted to true...");
+                console.dir(res);
+                $scope.pollingCompleted = true;
+                $scope.error = false;
+                //$scope.statusMessage = "should not show..."; -- Works
+                $scope.pages = res.data.pages;
+                $scope.page = res.data.page;
+                $scope.books = res.data.data;
+            },
+            function(res) { //Error function text is in res.data
+                console.log("At error func");
+                $scope.pollingCompleted = true;
+                $scope.error = true;
+                $scope.statusMessage = `Error returned by server: ${res.data}`;
+            }
+        )
     });
     
-    $scope.displayBooks = function() {
-        $scope.$apply();  //Updates the view and what we see...
-        console.log("Display books called3");
-        
+    $scope.nextPage = function() {
+        console.log("Next Page clicked");
     }
+    
 });
 
 ngApp.directive('dlEnter', function() {

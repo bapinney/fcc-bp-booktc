@@ -87,7 +87,6 @@ router.get('/allbooks', function(req, res, next) {
 
 router.post('/getbooks', function(req, res, next) {
     console.log(chalk.bgBlue.white("At getbooks!"));
-    console.dir(req);
     Book.paginate({}, { page: 1, sort: { dateAdded: -1}, limit: 5 }, function(err, results) {
         console.dir(results);
         var returnJson = {};
