@@ -54,7 +54,7 @@ ngApp.controller('allbooks', function($scope, $compile, $http) {
     console.log("At all!books");
     $scope.pollingCompleted = false;
     $scope.error = false;
-    $scope.statusMessage = "Loading data 123...";
+    $scope.statusMessage = "Loading books...";
     $scope.$on('$stateChangeSuccess', function() { 
         console.log("%c At allbooks $sCS!", "color:blue; font-size:16px");
         var grid = angular.element("#book-grid");
@@ -63,7 +63,7 @@ ngApp.controller('allbooks', function($scope, $compile, $http) {
         var req = {
             method: 'POST',
             url: "getbooks",
-            data: { page: 0, limit: 30}
+            data: { page: 1, limit: 6} //The first page is 1, NOT 0
         };
         
         $http(req).then(
@@ -83,12 +83,67 @@ ngApp.controller('allbooks', function($scope, $compile, $http) {
                 $scope.error = true;
                 $scope.statusMessage = `Error returned by server: ${res.data}`;
             }
-        )
+        );
     });
     
     $scope.nextPage = function() {
         console.log("Next Page clicked");
-    }
+        $scope.error = false;
+        $scope.statusMessage = "Fetching next page...";
+        $scope.pollingCompleted = false;
+        
+        var req = {
+            method: 'POST',
+            url: "getbooks",
+            data: { page: ($scope.page + 1), limit: 6 }
+        }
+                
+        $http(req).then(
+            function(res) {
+                console.log("at then 2");
+                console.dir(res);
+                $scope.pages = res.data.pages;
+                $scope.page = res.data.page;
+                $scope.books = res.data.data;
+                $scope.pollingCompleted = true;
+            },
+            function(res) {
+                $scope.pollingCompleted = true;
+                $scope.error = true;
+                $scope.statusMessage = "Error while fetching data...";
+            }
+        );
+    };
+    
+    $scope.prevPage = function() {
+        console.log("Prev Page clicked");
+        $scope.error = false;
+        $scope.statusMessage = "Fetching next page...";
+        $scope.pollingCompleted = false;
+        
+        var req = {
+            method: 'POST',
+            url: "getbooks",
+            data: { page: ($scope.page - 1), limit: 6 }
+        }
+                
+        $http(req).then(
+            function(res) {
+                console.log("at then 2");
+                console.dir(res);
+                $scope.pages = res.data.pages;
+                $scope.page = res.data.page;
+                $scope.books = res.data.data;
+                $scope.pollingCompleted = true;
+            },
+            function(res) {
+                $scope.pollingCompleted = true;
+                $scope.error = true;
+                $scope.statusMessage = "Error while fetching data...";
+            }
+        );
+    };
+    
     
 });
 
@@ -110,7 +165,7 @@ ngApp.directive('dlEnter', function() {
     }
 })
 
-ngApp.controller('addbook', function($scope, $compile, $http) {
+ngApp.controller('addbook', function($scope, $compile, $http, $state) {
     console.log("At allbooks");
     
     $scope.add_disabled = true; //Keep the button disabled at the start
@@ -252,13 +307,16 @@ ngApp.controller('addbook', function($scope, $compile, $http) {
              data: book})
         .then(function(response) {
             if (response.data.status == "added") {
-                console.log("Book added!")
+                console.log("Book added!");
+                abBtn.removeClass("adding-button").addClass("add-success-button").text("Success!");
+                setTimeout(function() { $state.go("mybooks");}, 5000);
             }
         }, function(response) { //Error
             console.log("At error");
             $scope.resultError = true;
-            $scope.resultErrorMessage = "idk, my bff Jill?";
+            $scope.resultErrorMessage = response.data;
             window.alert("There was an error processing your request: " + response.data);
+            abBtn.removeClass("adding-button").addClass("add-error-button").text("Error");
         });
     }
     
@@ -279,14 +337,32 @@ ngApp.controller('mybooks', function($scope, $compile, $http) {
     });
 });
 
-ngApp.controller('profile', function($scope, $http) {
+ngApp.controller('profile', function($scope, $http, $state) {
    console.log("Inside profile controller");
+    $scope.minNameLen = 6;
+    $scope.minCityLen = 3;
+    $scope.isRequired = true;
     $scope.$on('$stateChangeSuccess', function() {
-        angular.element("#form_name").focus();
+        angular.element("#status_text").text("Fetching profile information...");
+        $http({
+            method: 'GET',
+            url: '/profileinfo'
+        }).then(function successCb(res) {
+            console.dir(res);
+            $scope.fullname = res.data.fullname;
+            $scope.city = res.data.city;
+            $scope.state = res.data.state;
+            angular.element("#profile_form *:disabled").removeAttr("disabled");
+            angular.element("#status_text").text("");
+            angular.element("#form_name").focus();
+        }, function errorCb(res) {});
     });
     
     $scope.updateProfile = function() {
         console.log("updateProfile called!");
+        $scope.submitDisabled = true;
+        var formBtn = angular.element("#form_button");
+        
         console.dir($scope);
         
         var data = {
@@ -303,7 +379,22 @@ ngApp.controller('profile', function($scope, $http) {
         };
         
         angular.element("#form_button").removeClass("btn-success").addClass("btn-info").text("Updating...");
-        $http.post("updateProfile", data)
+        
+        
+        $http({method: 'POST', url: "/updateProfile", data: data})
+            .then(function(res){ 
+                console.log("at then");
+                console.dir(res);
+                if (typeof res.data.status !== "undefined" && res.data.status == "success") {
+                    angular.element("#form_button").removeClass("btn-info").addClass("btn-disabled-success").text("Success!");
+                    window.setTimeout(function() { $state.go('home'); }, 3000);    
+                }
+            },
+            function(res) { 
+                console.log("at error");
+                angular.element("#form_button").removeClass("btn-info").addClass("btn-danger").text("Error.  Please try again later.");
+                console.dir(res);
+            });
     }
     
 });

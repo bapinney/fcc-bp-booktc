@@ -1,19 +1,20 @@
 h1 Profile page
 h2 Update your information
 div(ng-controller="profile")
-    form(class="form_container" id="profile_form" name="profile") 
+    div(id="status_text" class="status_text")
+    form(class="form_container" id="profile_form" name="profileForm" ng-model="profile") 
         label(for="fullname")
             u F
             |ull name
-        input(type="text" id="form_name" name="fullname" ng-model="fullname" accesskey="f") 
+        input(type="text" id="form_name" name="fullname" ng-model="fullname" ng-required="isRequired" ng-minlength="minNameLen" accesskey="f" disabled) 
         label(for="city")
             u C
             |ity
-        input(type="text" id="form_city" name="city" ng-model="city" accesskey="c") 
+        input(type="text" id="form_city" name="city" ng-model="city" accesskey="c" ng-minlength="minCityLen" ng-required="isRequired" disabled) 
         label(for="state") S
             u t
             |ate
-        select(name="state" id="form_state" ng-model="state" accesskey="t") 
+        select(name="state" id="form_state" disabled ng-required ng-model="state" accesskey="t") 
             option(value="AL") Alabama
             option(value="AK") Alaska
             option(value="AZ") Arizona
@@ -46,7 +47,7 @@ div(ng-controller="profile")
             option(value="NH") New Hampshire
             option(value="NJ") New Jersey
             option(value="NM") New Mexico
-            option(falue="NY")  New York
+            option(value="NY") New York
             option(value="NC") North Carolina
             option(value="ND") North Dakota
             option(value="OH") Ohio
@@ -74,7 +75,7 @@ div(ng-controller="profile")
             option(value="AA") Armed Forces Americas
             option(value="AP") Armed Forces Pacific
             option(value="AE") Armed Forces Others
-        button(class="btn btn-success" form="profile" ng-click="updateProfile()" accesskey="u" id="form_button")
+        button(type="submit" class="btn btn-success" form="profile" ng-disabled="profileForm.$invalid || submitDisabled" ng-click="updateProfile()" accesskey="u" id="form_button")
             |S
             u u
             |bmit

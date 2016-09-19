@@ -83,6 +83,14 @@ main.ng-enter-active {
     font-style: italic;
 }
 
+.add-success-button:disabled {
+    background-color: hsl(120, 61%, 50%);
+    border-color: hsl(120, 61%, 50%);
+    box-shadow: 0 0 1px 1px hsla(120, 61%, 50%, .5);
+    color: white;
+    font-style: italic;   
+}
+
 .book {
     border: 1px dotted blue;
     display: inline-flex;
@@ -234,13 +242,30 @@ main.ng-enter-active {
 }
 
 #next_button {
+    cursor: pointer;
     display: inline block;
     float: right;
 }
 
 #prev_button {
+    cursor: pointer;
     display: inline-block;
     float: left;
+}
+
+#profile_form *:disabled {
+    background-color: rgba(0, 0, 0, 0.1)
+}
+
+#profile_form .btn-info:disabled {
+    background-color: hsl(45, 66%, 61%);
+    border-color: hsl(45, 67%, 56%);
+}
+
+#profile_form .btn-disabled-success:disabled {
+    color: #fff;
+    background-color: #5cb85c;
+    border-color: #4cae4c;
 }
 
 #splash_img img {

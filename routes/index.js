@@ -26,6 +26,7 @@ var errIfLoggedOut = function(req, res, next) {
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
+    console.dir(req.user);
     if (typeof req.user !== "undefined") {
         res.render('shell', { title: req.app.get("title"), username: req.user.username });
     }
@@ -47,12 +48,9 @@ router.post('/addnewbook', loggedIn, function(req, res, next) {
         !req.body.hasOwnProperty("title") ||
         !req.body.hasOwnProperty("image")) 
     {
-        res.status(500).send("Missing required data...");
+        res.status(500).send("Unable to add book.  Please check data and try again...");
         return false;
     }
-    
-    res.status(500).send("Missing required data error (remove when done)...");
-    return false;
     
     var newBook = new Book({
         bookOwner: {
@@ -87,13 +85,32 @@ router.get('/allbooks', function(req, res, next) {
 
 router.post('/getbooks', function(req, res, next) {
     console.log(chalk.bgBlue.white("At getbooks!"));
-    Book.paginate({}, { page: 1, sort: { dateAdded: -1}, limit: 5 }, function(err, results) {
+    if (typeof req.body.page !== "undefined") {
+        var page = Number(req.body.page);
+        console.log("Page is " + page);
+        console.log(typeof page);
+    }
+    else {
+        var page = 1;
+        console.log("Defaulting page to 1...");
+    }
+    if (typeof req.body.limit == "number") {
+        var limit = req.body.limit;
+    }
+    else {
+        var limit = 10;
+    }
+    
+    Book.paginate({}, { page: page, sort: { dateAdded: -1}, limit: limit }, function(err, results) {
         console.dir(results);
         var returnJson = {};
-        returnJson.total = results.total;
-        returnJson.pages = results.pages;
-        returnJson.page = results.page;
+        if (typeof results.total !== "undefined") {
+            returnJson.total = results.total;
+            returnJson.pages = results.pages;
+            returnJson.page = results.page;
+        }
         returnJson.data = results.docs;
+        console.log("here is returnJson");
         res.json(returnJson);
     })
 });
@@ -122,10 +139,27 @@ router.get('/profile', loggedIn, function(req, res, next) {
             res.error("Error: " + err)
         }
         if (user) {
-            res.render("profile.pug", req);
+            res.render("profile.pug", {profile: user.profile});
         }    
     });
 })
+
+// Profile Info
+router.get('/profileinfo', loggedIn, function(req, res, next) {
+    console.log(chalk.cyan("At profileinfo..."));
+    User.findOne({
+        username: req.user.username
+    }, function(err, user) {
+        if (err) {
+            res.json({err: "Error fetching user information"});
+        }
+        if (user) {
+            console.log("Here is profile information being returned...");
+            console.dir(user.profile);
+            res.json(user.profile);
+        }    
+    });
+});
 
 // Splash page
 router.get('/splash', function(req, res, next) {
@@ -152,9 +186,11 @@ router.post("/updateProfile", function (req, res, next) {
             user.save(function(err, user) {
                 if (err) {
                     console.error(err);
+                    res.status(500).error("Error")
                 }
                 else {
                     console.log("Saved called without errors!");
+                    res.json({status: "success"});
                 }
             });
         }
