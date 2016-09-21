@@ -129,6 +129,40 @@ router.get('/mybooks', loggedIn, function(req, res, next) {
     res.render("mybooks.pug");
 })
 
+// My Books (POST)
+router.post('/mybooks', loggedIn, function(req, res, next) {
+    console.log(chalk.bgBlue.white("At getbooks!"));
+    if (typeof req.body.page !== "undefined") {
+        var page = Number(req.body.page);
+        console.log("Page is " + page);
+        console.log(typeof page);
+    }
+    else {
+        var page = 1;
+        console.log("Defaulting page to 1...");
+    }
+    if (typeof req.body.limit == "number") {
+        var limit = req.body.limit;
+    }
+    else {
+        var limit = 10;
+    }
+    
+    Book.paginate({"bookOwner.userName": req.user.username, "bookOwner.userProvider": req.user.provider}, { page: page, sort: { dateAdded: -1}, limit: limit }, function(err, results) {
+        console.dir(results);
+        var returnJson = {};
+        if (typeof results.total !== "undefined") {
+            returnJson.total = results.total;
+            returnJson.pages = results.pages;
+            returnJson.page = results.page;
+        }
+        returnJson.data = results.docs;
+        console.log("here is returnJson");
+        res.json(returnJson);
+    })
+})
+
+
 // Profile
 router.get('/profile', loggedIn, function(req, res, next) {
     console.log(chalk.cyan("At profile..."));

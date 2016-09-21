@@ -4,7 +4,7 @@ div(ng-controller="addbook")
         img(id="book_cover" ng-model="bookCover" ng-src="{{book.img2use}}")
     div(class="form_container")
         div(id="add_instructions" class="instructions_text") Search for a book title, click on a result to preview,  then click Add Book to add a book
-        form(name="addBook_form" ng-submit="addBook()")
+        form(name="addBook_form")
             label(for="title_input") Book 
                 u T
                 |itle
@@ -16,7 +16,7 @@ div(ng-controller="addbook")
                 u C
                 |overs
             select(disabled id="book_select" accesskey="c" size="5" dl-enter="preventDefault()" ng-model="book.selectedBook" ng-change="updateCoverPreview()")
-            button(class="add-button" ng-disabled="add_disabled" ng-model="add_book_button" id="add_book_button" accesskey="d")
+            button(class="add-button" ng-disabled="add_disabled" ng-model="add_book_button" id="add_book_button" ng-click="addBook()" accesskey="d")
                 i(class="fa fa-book icon-margin")
                 |A
                 u d

@@ -50,8 +50,8 @@ ngApp.config(function ($stateProvider, $urlRouterProvider) {
     
 });
 
-ngApp.controller('allbooks', function($scope, $compile, $http) {
-    console.log("At all!books");
+ngApp.controller('allbooks', function($scope, $http) {
+    console.log("At allbooks");
     $scope.pollingCompleted = false;
     $scope.error = false;
     $scope.statusMessage = "Loading books...";
@@ -165,7 +165,7 @@ ngApp.directive('dlEnter', function() {
     }
 })
 
-ngApp.controller('addbook', function($scope, $compile, $http, $state) {
+ngApp.controller('addbook', function($scope, $http, $state) {
     console.log("At allbooks");
     
     $scope.add_disabled = true; //Keep the button disabled at the start
@@ -329,12 +329,102 @@ ngApp.controller('logout', function($scope, $http) {
     });
 });
 
-ngApp.controller('mybooks', function($scope, $compile, $http) {
+ngApp.controller('mybooks', function($scope, $http) {
     console.log("At mybooks");
+    $scope.pollingCompleted = false;
+    $scope.error = false;
+    $scope.statusMessage = "Loading books...";
     $scope.$on('$stateChangeSuccess', function() { 
-        console.log("%c At mybooks!", "color:blue; font-size:20px");
-
+        console.log("%c At mybooks $sCS!", "color:blue; font-size:16px");
+        var grid = angular.element("#book-grid");
+        console.log("Polling for all books...");
+        
+        var req = {
+            method: 'POST',
+            url: "mybooks",
+            data: { page: 1, limit: 6} //The first page is 1, NOT 0
+        };
+        
+        $http(req).then(
+            function(res) { //Success function
+                console.log("Setting pollingCompleted to true...");
+                console.dir(res);
+                $scope.pollingCompleted = true;
+                $scope.error = false;
+                //$scope.statusMessage = "should not show..."; -- Works
+                $scope.pages = res.data.pages;
+                $scope.page = res.data.page;
+                $scope.books = res.data.data;
+            },
+            function(res) { //Error function text is in res.data
+                console.log("At error func");
+                $scope.pollingCompleted = true;
+                $scope.error = true;
+                $scope.statusMessage = `Error returned by server: ${res.data}`;
+            }
+        );
+        
+        
     });
+    
+    $scope.nextPage = function() {
+        console.log("Next Page clicked");
+        $scope.error = false;
+        $scope.statusMessage = "Fetching next page...";
+        $scope.pollingCompleted = false;
+        
+        var req = {
+            method: 'POST',
+            url: "mybooks",
+            data: { page: ($scope.page + 1), limit: 6 }
+        }
+                
+        $http(req).then(
+            function(res) {
+                console.log("at then 2");
+                console.dir(res);
+                $scope.pages = res.data.pages;
+                $scope.page = res.data.page;
+                $scope.books = res.data.data;
+                $scope.pollingCompleted = true;
+            },
+            function(res) {
+                $scope.pollingCompleted = true;
+                $scope.error = true;
+                $scope.statusMessage = "Error while fetching data...";
+            }
+        );
+    };
+    
+    $scope.prevPage = function() {
+        console.log("Prev Page clicked");
+        $scope.error = false;
+        $scope.statusMessage = "Fetching next page...";
+        $scope.pollingCompleted = false;
+        
+        var req = {
+            method: 'POST',
+            url: "mybooks",
+            data: { page: ($scope.page - 1), limit: 6 }
+        }
+                
+        $http(req).then(
+            function(res) {
+                console.log("at then 2");
+                console.dir(res);
+                $scope.pages = res.data.pages;
+                $scope.page = res.data.page;
+                $scope.books = res.data.data;
+                $scope.pollingCompleted = true;
+            },
+            function(res) {
+                $scope.pollingCompleted = true;
+                $scope.error = true;
+                $scope.statusMessage = "Error while fetching data...";
+            }
+        );
+    };
+    
 });
 
 ngApp.controller('profile', function($scope, $http, $state) {

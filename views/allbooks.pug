@@ -4,5 +4,9 @@ div(ng-controller="allbooks")
     div(id="book_grid")
         div(ng-repeat="book in books" class="book")
             img(ng-src="{{book.imgUrl}}")
-    a(id="prev_button" ng-click="prevPage()" ng-show="page > 1") Prev
-    a(id="next_button" ng-click="nextPage()" ng-show="page < pages && page != pages") Next
+    a(id="prev_button" ng-click="prevPage()" accesskey="&gt;" ng-show="page > 1") 
+        u <
+        | Prev
+    a(id="next_button" ng-click="nextPage()" accesskey="&lt;" ng-show="page < pages && page != pages")
+        |Next
+        u >
