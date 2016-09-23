@@ -2,6 +2,7 @@ html {
     height: 100%;
 }
 
+ /* Orig hsl(240, 44%, 45%); */
 @bg-color: hsl(220, 44%, 95%); /* Orig hsl(240, 44%, 45%); */
 /* @bg-col2 /* Orig hsl(240, 66%, 30%); */
 @bg-col2: darken(saturate(@bg-color, 22%), 15%);
@@ -92,17 +93,21 @@ main.ng-enter-active {
 }
 
 .book {
+    background-color: fade(@bg-color,80);
     border: 1px dotted blue;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
+    display: inline-block;
     height: 175px;
     width: 125px;
     margin: 5px;
+    position: relative;
 }
 
 .book img {
+    display: block;
+    margin: auto;
     height: 100%;
+    max-width: 100%;
+    z-index: 1;
 }
 
 .disabled_input {
@@ -230,11 +235,24 @@ main.ng-enter-active {
     max-width: 128px;
 }
 
-#book_preview img {
+#book_preview .bookimg {
     display: block;
     margin: auto auto;
     max-height: 100%;
     max-width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.book .tradeicon {
+    color: hsl(45, 95%, 52%);
+    cursor: pointer;
+    font-size: 20px;
+    position: absolute; /* Make sure parent's position is relative */
+    top: 0%;
+    right: 5px;
+    z-index: 2;
+    text-shadow: 0px 0px 10px black;
 }
 
 #form_button {

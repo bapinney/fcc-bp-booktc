@@ -58,12 +58,13 @@ ngApp.controller('allbooks', function($scope, $http) {
     $scope.$on('$stateChangeSuccess', function() { 
         console.log("%c At allbooks $sCS!", "color:blue; font-size:16px");
         var grid = angular.element("#book-grid");
+        $scope.myUsername = angular.element('#li-sign-out').data('username')
         console.log("Polling for all books...");
       
         var req = {
             method: 'POST',
             url: "getbooks",
-            data: { page: 1, limit: 6} //The first page is 1, NOT 0
+            data: { page: 1, limit: 8} //The first page is 1, NOT 0
         };
         
         $http(req).then(
@@ -87,6 +88,9 @@ ngApp.controller('allbooks', function($scope, $http) {
     });
     
     $scope.nextPage = function() {
+        if (angular.element("#next_button").css("display") == "none") {
+            return false;
+        }
         console.log("Next Page clicked");
         $scope.error = false;
         $scope.statusMessage = "Fetching next page...";
@@ -116,6 +120,9 @@ ngApp.controller('allbooks', function($scope, $http) {
     };
     
     $scope.prevPage = function() {
+        if (angular.element("#prev_button").css("display") == "none") {
+            return false;
+        }
         console.log("Prev Page clicked");
         $scope.error = false;
         $scope.statusMessage = "Fetching next page...";
@@ -143,6 +150,10 @@ ngApp.controller('allbooks', function($scope, $http) {
             }
         );
     };
+    
+    $scope.tradeBook = function($event) {
+        console.dir($event);
+    }
     
     
 });
@@ -368,6 +379,9 @@ ngApp.controller('mybooks', function($scope, $http) {
     });
     
     $scope.nextPage = function() {
+        if (angular.element("#next_button").css("display") == "none") {
+            return false;
+        }
         console.log("Next Page clicked");
         $scope.error = false;
         $scope.statusMessage = "Fetching next page...";
@@ -376,7 +390,7 @@ ngApp.controller('mybooks', function($scope, $http) {
         var req = {
             method: 'POST',
             url: "mybooks",
-            data: { page: ($scope.page + 1), limit: 6 }
+            data: { page: ($scope.page + 1), limit: 8 }
         }
                 
         $http(req).then(
@@ -397,6 +411,9 @@ ngApp.controller('mybooks', function($scope, $http) {
     };
     
     $scope.prevPage = function() {
+        if (angular.element("#prev_button").css("display") == "none") {
+            return false;
+        }
         console.log("Prev Page clicked");
         $scope.error = false;
         $scope.statusMessage = "Fetching next page...";

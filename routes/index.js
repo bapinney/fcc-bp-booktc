@@ -149,6 +149,11 @@ router.post('/mybooks', loggedIn, function(req, res, next) {
     }
     
     Book.paginate({"bookOwner.userName": req.user.username, "bookOwner.userProvider": req.user.provider}, { page: page, sort: { dateAdded: -1}, limit: limit }, function(err, results) {
+        if (err) {
+            console.log(chalk.bgRed("Error: ") + err);
+            res.status(500).json({error: err});
+            return false;
+        }
         console.dir(results);
         var returnJson = {};
         if (typeof results.total !== "undefined") {

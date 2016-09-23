@@ -3,10 +3,9 @@ div(ng-controller="allbooks")
     div(id="status_text" ng-class="{status_text_error : error === true, status_text: error === false}" ng-show="!pollingCompleted || error") {{statusMessage}}
     div(id="book_grid")
         div(ng-repeat="book in books" class="book")
-            img(ng-src="{{book.imgUrl}}")
-    a(id="prev_button" ng-click="prevPage()" accesskey="&gt;" ng-show="page > 1") 
-        u <
-        | Prev
-    a(id="next_button" ng-click="nextPage()" accesskey="&lt;" ng-show="page < pages && page != pages")
+            img(ng-src="{{book.imgUrl}}" class="bookimg" data-owner="{{book.bookOwner[0].userName}}")
+            span(class="tradeicon fa fa-exchange" ng-show="book.bookOwner[0].userName !== myUsername" ng-click="tradeBook()")
+    a(id="prev_button" ng-click="prevPage()" accesskey="q" ng-show="page > 1") 
+        |Prev
+    a(id="next_button" ng-click="nextPage()" accesskey="w" ng-show="page < pages && page != pages")
         |Next
-        u >
