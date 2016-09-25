@@ -200,6 +200,11 @@ router.get('/profileinfo', loggedIn, function(req, res, next) {
     });
 });
 
+router.get('/requestTreade', function (req, res, next) {
+    console.dir(req);
+    res.json({status: "foo"});
+});
+
 // Splash page
 router.get('/splash', function(req, res, next) {
     res.render('home');

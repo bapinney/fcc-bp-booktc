@@ -56,11 +56,19 @@ ngApp.controller('allbooks', function($scope, $http) {
     $scope.pollingCompleted = false;
     $scope.error = false;
     $scope.statusMessage = "Loading books...";
+    $scope.initTooltips = function() {
+        $('[data-toggle="tooltip"]').tooltip(); 
+    }
+    
     $scope.$on('$stateChangeSuccess', function() { 
         console.log("%c At allbooks $sCS!", "color:blue; font-size:16px");
         var grid = angular.element("#book-grid");
         $scope.myUsername = angular.element('#li-sign-out').data('username');
         $scope.signedIn = typeof $scope.myUsername !== "undefined";
+        if (!$scope.signedIn) {
+            console.log("Setting preLoginPage");
+            sessionStorage.setItem("preLoginPage", document.location.hash);
+        }
         console.log("Polling for all books...");
       
         var req = {
@@ -87,6 +95,10 @@ ngApp.controller('allbooks', function($scope, $http) {
                 $scope.statusMessage = `Error returned by server: ${res.data}`;
             }
         );
+    });
+    
+    $scope.$on('$viewContentLoaded', function() {
+        console.log("at vcl444");
     });
     
     $scope.nextPage = function() {
@@ -154,9 +166,32 @@ ngApp.controller('allbooks', function($scope, $http) {
     };
     
     $scope.tradeBook = function($event) {
+        console.log("tradeBook called...");
         console.dir($event);
+        var book = angular.element($event.target).scope().book;
+        console.dir(book);
+        if (typeof book == "undefined" || typeof book._id == "undefined") {
+            console.log("%cUnable to find book data in JSON", "background-color: red; color: white; font-size:16px;");
+            return false;
+        }
+        console.dir($event);
+        var req = {
+            method: 'POST',
+            url: "requestTrade",
+            bookRequested: book._id 
+        }
+        
+        $http(req).then(
+            function(res) {
+                console.log("At res");
+                console.dir(res);
+            },
+            function(res) { //Error
+                console.error("At res error");
+                console.dir(res);
+            }
+        )
     }
-    
     
 });
 
@@ -349,6 +384,11 @@ ngApp.controller('mybooks', function($scope, $http) {
     $scope.pollingCompleted = false;
     $scope.error = false;
     $scope.statusMessage = "Loading books...";
+    
+    $scope.testRD = function() {
+        console.log("Made it to testRD");
+    }
+    
     $scope.$on('$stateChangeSuccess', function() { 
         console.log("%c At mybooks $sCS!", "color:blue; font-size:16px");
         var grid = angular.element("#book-grid");
@@ -507,6 +547,23 @@ ngApp.controller('profile', function($scope, $http, $state) {
     }
     
 });
+
+ngApp.directive('repeatDone', function () {
+    return {
+        restrict: "A",
+        link: function (scope, element, attrs) {
+            if (scope.$last) {
+                console.dir(scope);
+                console.dir(scope.$parent);
+                console.dir(attrs);
+                console.log(typeof scope.$eval);
+                console.log(typeof scope.$parent.$eval);
+                scope.$eval(attrs.repeatDone);
+            }
+        }
+    };
+});
+
 
 $(function() { //Document ready
     //Also works when an elements acceskey is used (instead of click)
