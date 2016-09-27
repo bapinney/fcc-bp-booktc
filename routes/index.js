@@ -2,7 +2,9 @@ var chalk = require('chalk');
 var express = require('express');
 var passport = require('passport');
 var router = express.Router();
+var ObjectId = require('mongoose').Types.ObjectId;
 var Book = require('../models/book.js');
+var Trade = require('../models/trade.js');
 var User = require('../models/user.js');
 
 //Login check
@@ -60,7 +62,8 @@ router.post('/addnewbook', loggedIn, function(req, res, next) {
         },
         imgUrl: req.body.image,
         title: req.body.title,
-        likes: []
+        likes: [],
+        tradePending: false
     });
 
     newBook.save(function (err, result) {
@@ -115,6 +118,29 @@ router.post('/getbooks', function(req, res, next) {
     })
 });
 
+router.get('/getNTrades', loggedIn, function (req, res, next) {
+    console.log("At getNTrades");
+    var dbgObj = {
+            "fromUser.userName": req.user.username
+        };
+    console.dir(dbgObj);
+    Trade.count(
+        {
+            //"fromUser.userName": req.user.username
+        },
+        function (err, count) {
+            console.log("At callback");
+            if (err) {
+                console.log(err);
+            }
+            if (count) {
+                console.log("Count is ");
+                console.dir(count);
+            }
+        }
+    );
+    
+});
 router.get('/loginRtn', function(req, res, next) {
     res.render("loginrtn.pug");
 });
@@ -135,7 +161,6 @@ router.post('/mybooks', loggedIn, function(req, res, next) {
     if (typeof req.body.page !== "undefined") {
         var page = Number(req.body.page);
         console.log("Page is " + page);
-        console.log(typeof page);
     }
     else {
         var page = 1;
@@ -154,7 +179,7 @@ router.post('/mybooks', loggedIn, function(req, res, next) {
             res.status(500).json({error: err});
             return false;
         }
-        console.dir(results);
+        //console.dir(results);
         var returnJson = {};
         if (typeof results.total !== "undefined") {
             returnJson.total = results.total;
@@ -162,7 +187,6 @@ router.post('/mybooks', loggedIn, function(req, res, next) {
             returnJson.page = results.page;
         }
         returnJson.data = results.docs;
-        console.log("here is returnJson");
         res.json(returnJson);
     })
 })
@@ -200,9 +224,115 @@ router.get('/profileinfo', loggedIn, function(req, res, next) {
     });
 });
 
-router.get('/requestTreade', function (req, res, next) {
-    console.dir(req);
-    res.json({status: "foo"});
+router.post('/requestTrade', loggedIn, function (req, res, next) {
+    console.log("req.body...");
+    console.dir(req.body);
+    var foundBook = null;
+
+    //Check and see if we have a body in this POST, and that we have a bookRequested in that POST
+    if (typeof req.body !== "object") {
+        res.status(500).json({
+            status: "error",
+            message: "No POST body"
+        });
+        return false;
+    }
+    if (!req.body.hasOwnProperty("bookRequested")) {
+        res.status(500).json({
+            status: "error",
+            message: "No Book in Request"
+        });
+        return false;
+    }
+
+    //Find the book 
+    Book.findOne({
+        _id: new ObjectId(req.body.bookRequested)
+    }, function (err, book) {
+        if (err) {
+            console.log(chalk.red("Error: ") + err);
+            res.status(500).json({
+                status: "error",
+                message: "Error querying book to be traded."
+            });
+            return false;
+        }
+
+        if (!book) {
+            console.log("Book not found!");
+            res.status(500).json({
+                status: "error",
+                message: "Book not found"
+            });
+            return false;
+        } else {
+            console.log("Book found!");
+            foundBook = book;
+            tradeContinue(req, res);
+        }
+
+    });
+
+    //Remember, the callback above is async, so we have to use a callback function to dictate what to do if we found a book to trade...
+    var tradeContinue = function (req, res) {
+        console.log("Book user has requested trade for has been found...");
+        console.log(foundBook.title);
+        //console.dir(foundBook);
+
+        //Checking to see if trade is not already outstanding...
+        Trade.findOne({
+            bookId: foundBook.id,
+            isCompleted: false
+        }, function (err, trade) {
+            //console.log(typeof trade); //will be null if no trades with that book id are found...
+            if (trade !== null) {
+                res.status(500).json({
+                    status: "error",
+                    message: "A pending trade request is already outstanding for this book."
+                });
+                return false;
+            } else {
+                var tradeData = {
+                    bookId: foundBook.id,
+                    fromUser: foundBook.bookOwner,
+                    toUser: [{
+                        userProvider: req.user.provider,
+                        userId: req.user.id,
+                        userName: req.user.username
+                    }],
+                    isCompleted: false
+                };
+
+                var trade = new Trade(tradeData);
+                
+                //Save the pending trade request to the journal.  If successful, mark the book as trade pending...
+                trade.save(function (err, result) {
+                    if (err) {
+                        console.log("Error while saving");
+                    }
+                    if (result) {
+                        console.log("Success while saving");
+                        console.dir(result);
+                        foundBook.tradePending = true;
+                        foundBook.save(function (err, result) {
+                            if (err) {
+                                console.log(chalk.red("Error:") + " " + err);
+                            }
+                            if (result) {
+                                console.log(chalk.green("Result:") + " " + res);
+                                res.json({status: "success"});
+                            }
+                        });
+                    }
+                });
+            }
+        })
+
+
+
+
+    }
+
 });
 
 // Splash page

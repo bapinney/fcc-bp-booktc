@@ -18,7 +18,8 @@ var bookSchema = new Schema({
     bookOwner       : [bookOwnerSchema],
     imgUrl          : String,
     title           : String,
-    likes           : Array
+    likes           : Array,
+    tradePending    : Boolean
     },
     {collection: 'fccbooktc-books'} //The collection will be created if it does not exist
 );

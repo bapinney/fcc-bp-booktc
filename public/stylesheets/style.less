@@ -3,13 +3,18 @@ html {
 }
 
  /* Orig hsl(240, 44%, 45%); */
-@bg-color: hsl(220, 44%, 95%); /* Orig hsl(240, 44%, 45%); */
+@bg-col: hsl(220, 44%, 95%); /* Orig hsl(240, 44%, 45%); */
 /* @bg-col2 /* Orig hsl(240, 66%, 30%); */
-@bg-col2: darken(saturate(@bg-color, 22%), 15%);
-@h1-color: darken(saturate(@bg-color, 22%), 65%);
+@bg-col2: darken(saturate(@bg-col, 22%), 15%);
+
+@h1-color: darken(saturate(@bg-col, 22%), 65%);
+@mainbg-col: whitesmoke;
+@ttbg-col: darken(@bg-col, 35);
+@ttarrow-bg-col: darken(@bg-col2, 35);
+
 
 body {
-    background: radial-gradient(ellipse at center, @bg-color 0%, @bg-col2 100%);
+    background: radial-gradient(ellipse at center, @bg-col 0%, @bg-col2 100%);
     background-attachment: fixed;
     background-repeat: no-repeat;
     background-size: 100%;
@@ -23,10 +28,11 @@ a {
 }
 
 main {
-    background-color: whitesmoke;
+    background-color: @mainbg-col;
     border-radius: 8px;
     box-shadow: inset 0px 0px 10px black;
     margin-bottom: 20px; /* So the main container has a gap between it and the bottom of the page */
+    padding-top: 10px;
     padding-bottom: 40px;
 }
 
@@ -93,7 +99,7 @@ main.ng-enter-active {
 }
 
 .book {
-    background-color:   fade(desaturate(darken(@bg-color,20),40),50%);
+    background-color:   fade(desaturate(darken(@bg-col,20),40),50%);
     border: 1px dotted blue;
     display: inline-block;
     height: 175px;
@@ -206,6 +212,14 @@ main.ng-enter-active {
     opacity: 1;
 }
 
+.tooltip.top .tooltip-arrow {
+    border-top-color: @ttarrow-bg-col;
+}
+
+.tooltip-inner {
+    background-color: @ttbg-col;
+}
+
 #add_book_button {
     border-radius: 4px;
     border-width: 2px;
@@ -259,6 +273,11 @@ main.ng-enter-active {
     transition: all 500ms ease-in-out;
 }
 
+#myReqsBtn {
+    background-color: hsl(120,saturation(@bg-col),lightness(@bg-col));
+    margin-right: 5px;
+}
+
 #next_button {
     cursor: pointer;
     display: inline block;
@@ -286,6 +305,11 @@ main.ng-enter-active {
     border-color: #4cae4c;
 }
 
+#reqsForMeBtn {
+    background-color: hsl(240,saturation(@bg-col),lightness(@bg-col));
+    margin-left: 5px;
+}
+
 #splash_img img {
     border-radius:10px;
     box-shadow: 0px 0px 5px 2px black;
@@ -295,6 +319,20 @@ main.ng-enter-active {
 
 #status_text:after {
     content: "\00a0"; /* Prevents empty space from being collapsed */
+}
+
+#trade_btns_div {
+    background-color: darken(@mainbg-col,5);
+    border-radius: 8px;
+    box-shadow: inset 0px 0px 1px 1px darken(@mainbg-col,9);
+    display: inline-block;
+    margin: 20px 0px -10px 0px;
+    padding: 10px;
+}
+
+#trade_btns_div button {
+    border-radius: 8px;
+    padding: 5px;
 }
 
 #welcome {
@@ -324,7 +362,7 @@ select {
 }
 
 select::-webkit-scrollbar {
-    background-color: @bg-color;
+    background-color: @bg-col;
     -webkit-appearance: none;
     width: 10px;
 }

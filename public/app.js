@@ -1,10 +1,26 @@
-console.log("%capp.js loaded","background-color:darkgreen; color:white; font-size:12px")
 var gBooksURI = "https://www.googleapis.com/books/v1/volumes?q=";
 
 var ngApp = angular.module('fcc-bp-booktc', ['ui.router', 'ngAnimate']);
+
+ngApp.run(function($rootScope, $http) {
+    console.log("%capp.js loaded","background-color:lightgreen; color:black; font-size:12px")
+    $rootScope.nMyReqs = null;
+    $rootScope.nReqsForMe = null;
+    
+    $rootScope.signedIn = document.getElementById("sign-out") !== null;
+    
+    $rootScope.updateTradeBtns = function() {
+        console.log("Update Trade Buttons called.");
+        var req = {
+            method: 'GET',
+            url: "getNTrades"
+        };
+        $http(req).then(function(res){console.log("at http res")},function(res){});
+    }
+});
+
 ngApp.config(function ($stateProvider, $urlRouterProvider) {
-    console.log("Inside router!!!");
-    console.log(typeof $urlRouterProvider);
+    console.log("Inside router");
     $urlRouterProvider.otherwise('/home'); //Where we go if there is no route
 
     // templateProvider: Provider function that returns HTML content string. See http://angular-ui.github.io/ui-router/site/#/api/ui.router.state.$stateProvider
@@ -50,13 +66,16 @@ ngApp.config(function ($stateProvider, $urlRouterProvider) {
     
 });
 
-ngApp.controller('allbooks', function($scope, $http) {
+ngApp.controller('allbooks', function($scope, $rootScope, $http) {
     console.log("At allbooks");
+    $scope.signedIn = $rootScope.signedIn;
+    
     var itemsPerPage = 8;
     $scope.pollingCompleted = false;
     $scope.error = false;
     $scope.statusMessage = "Loading books...";
     $scope.initTooltips = function() {
+        console.log("initTooltips called");
         $('[data-toggle="tooltip"]').tooltip(); 
     }
     
@@ -64,11 +83,12 @@ ngApp.controller('allbooks', function($scope, $http) {
         console.log("%c At allbooks $sCS!", "color:blue; font-size:16px");
         var grid = angular.element("#book-grid");
         $scope.myUsername = angular.element('#li-sign-out').data('username');
-        $scope.signedIn = typeof $scope.myUsername !== "undefined";
+
         if (!$scope.signedIn) {
             console.log("Setting preLoginPage");
             sessionStorage.setItem("preLoginPage", document.location.hash);
         }
+
         console.log("Polling for all books...");
       
         var req = {
@@ -97,10 +117,6 @@ ngApp.controller('allbooks', function($scope, $http) {
         );
     });
     
-    $scope.$on('$viewContentLoaded', function() {
-        console.log("at vcl444");
-    });
-    
     $scope.nextPage = function() {
         console.log("Next Page clicked");
         if (angular.element("#next_button").css("display") == "none") {
@@ -118,7 +134,7 @@ ngApp.controller('allbooks', function($scope, $http) {
                 
         $http(req).then(
             function(res) {
-                console.log("at then 2");
+                console.log("at http req then");
                 console.dir(res);
                 $scope.pages = res.data.pages;
                 $scope.page = res.data.page;
@@ -150,7 +166,7 @@ ngApp.controller('allbooks', function($scope, $http) {
                 
         $http(req).then(
             function(res) {
-                console.log("at then 2");
+                console.log("at http req then");
                 console.dir(res);
                 $scope.pages = res.data.pages;
                 $scope.page = res.data.page;
@@ -167,6 +183,7 @@ ngApp.controller('allbooks', function($scope, $http) {
     
     $scope.tradeBook = function($event) {
         console.log("tradeBook called...");
+        $scope.error = false;
         console.dir($event);
         var book = angular.element($event.target).scope().book;
         console.dir(book);
@@ -174,21 +191,33 @@ ngApp.controller('allbooks', function($scope, $http) {
             console.log("%cUnable to find book data in JSON", "background-color: red; color: white; font-size:16px;");
             return false;
         }
-        console.dir($event);
+
         var req = {
             method: 'POST',
             url: "requestTrade",
-            bookRequested: book._id 
+            data: {bookRequested: book._id}
         }
         
         $http(req).then(
             function(res) {
                 console.log("At res");
-                console.dir(res);
+                if (res.hasOwnProperty("data") && res.data.hasOwnProperty("status") && res.data.status == "success") {
+                    console.dir($event.target);
+                    $($event.target).fadeOut();
+                    $scope.updateTradeBtns(); //Show the new counts in the trade buttons...
+                }
             },
             function(res) { //Error
                 console.error("At res error");
                 console.dir(res);
+                if (res.hasOwnProperty("data") && res.data.hasOwnProperty("status") && res.data.hasOwnProperty("message") && res.data.status == "error") {
+                    console.log("Printing error message");
+                    $scope.error = true;
+                    $scope.statusMessage = res.data.message;
+                }
+                else {
+                    console.log("if was false");
+                }
             }
         )
     }
@@ -377,8 +406,10 @@ ngApp.controller('logout', function($scope, $http) {
     });
 });
 
-ngApp.controller('mybooks', function($scope, $http) {
+ngApp.controller('mybooks', function($scope, $rootScope, $http) {
     console.log("At mybooks");
+    $scope.signedIn = $rootScope.signedIn;
+    
     var itemsPerPage = 8;
     
     $scope.pollingCompleted = false;
@@ -550,14 +581,21 @@ ngApp.controller('profile', function($scope, $http, $state) {
 
 ngApp.directive('repeatDone', function () {
     return {
-        restrict: "A",
+        restrict: "A", //Restricts to only Attributes
+        /*
+        Directives that want to modify the DOM typically use the link option to register DOM listeners as well as update the DOM. It is executed after the template has been cloned and is where directive logic will be put.
+
+        link takes a function with the following signature, function link(scope, element, attrs, controller, transcludeFn) { ... }, where:
+
+        scope is an Angular scope object.
+        element is the jqLite-wrapped element that this directive matches.
+        attrs is a hash object with key-value pairs of normalized attribute names and their corresponding attribute values.
+        controller is the directive's required controller instance(s) or its own controller (if any). The exact value depends on the directive's require property.
+        transcludeFn is a transclude linking function pre-bound to the correct transclusion scope.
+        */
         link: function (scope, element, attrs) {
             if (scope.$last) {
-                console.dir(scope);
-                console.dir(scope.$parent);
-                console.dir(attrs);
-                console.log(typeof scope.$eval);
-                console.log(typeof scope.$parent.$eval);
+                console.log("At scope.$last");
                 scope.$eval(attrs.repeatDone);
             }
         }
