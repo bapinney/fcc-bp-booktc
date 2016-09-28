@@ -121,24 +121,62 @@ router.post('/getbooks', function(req, res, next) {
 router.get('/getNTrades', loggedIn, function (req, res, next) {
     console.log("At getNTrades");
     var dbgObj = {
-            "fromUser.userName": req.user.username
+            "toUser.userName": req.user.username
         };
     console.dir(dbgObj);
+    //TODO Figure out if there is a way to do both these queries as one, instead of two seperate queries...
+    
+    var nReqsForYou = null;
+    var nYourReqs = null;
+    //Count User's Trade Requests (i.e., FROM User)
     Trade.count(
         {
-            //"fromUser.userName": req.user.username
+            "fromUser.userName": req.user.username
         },
         function (err, count) {
             console.log("At callback");
             if (err) {
                 console.log(err);
+                res.status(500).json({error: err});
             }
             if (count) {
-                console.log("Count is ");
-                console.dir(count);
+                console.log(`Count is ${count}.`);
+                nReqsForYou = count; 
+            }
+            else {
+                console.log(`Count is ${count}.`);
+                nReqsForYou = 0;
             }
         }
     );
+    
+    //Trades FOR User (i.e., TO user)
+    var reqsForUser = Trade.count(
+        {
+            "toUser.userName": req.user.username
+        },
+        function (err, count) {
+            console.log("At callback 2");
+            if (err) {
+                console.log(err);
+                res.status(500).json({error: err});
+            }
+            if (count) {
+                console.log(`Count is ${count}.`);
+                console.log(count);
+                nYourReqs = count;
+                sendResponse();
+            }
+            else {
+                nYourReqs = 0;
+                sendResponse();
+            }
+        }
+    );
+    
+    var sendResponse = function() {
+        res.json({nYourReqs: nYourReqs, nReqsForYou: nReqsForYou});
+    }
     
 });
 router.get('/loginRtn', function(req, res, next) {
@@ -302,7 +340,10 @@ router.post('/requestTrade', loggedIn, function (req, res, next) {
                     }],
                     isCompleted: false
                 };
-
+                console.log("here is tradeData toUser");
+                console.dir(tradeData.toUser);
+                console.log("here is tradeData from User")
+                console.dir(tradeData.fromUser);
                 var trade = new Trade(tradeData);
                 
                 //Save the pending trade request to the journal.  If successful, mark the book as trade pending...

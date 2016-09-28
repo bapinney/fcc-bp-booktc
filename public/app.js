@@ -15,7 +15,21 @@ ngApp.run(function($rootScope, $http) {
             method: 'GET',
             url: "getNTrades"
         };
-        $http(req).then(function(res){console.log("at http res")},function(res){});
+        $http(req).then(
+            function(res) {
+                console.log("at http res")
+                console.dir(res);
+                if (res.data.hasOwnProperty("nReqsForYou")) {
+                    $rootScope.nReqsForMe = `(${res.data.nReqsForYou})`;
+                }
+                if (res.data.hasOwnProperty("nYourReqs")) {
+                    $rootScope.nMyReqs = `(${res.data.nYourReqs})`;
+                }
+            },
+            function(res) { //Error
+
+            }
+        );
     }
 });
 
@@ -84,9 +98,13 @@ ngApp.controller('allbooks', function($scope, $rootScope, $http) {
         var grid = angular.element("#book-grid");
         $scope.myUsername = angular.element('#li-sign-out').data('username');
 
-        if (!$scope.signedIn) {
+        if (!$rootScope.signedIn) {
             console.log("Setting preLoginPage");
             sessionStorage.setItem("preLoginPage", document.location.hash);
+        }
+        else {
+            console.log("Updating trade buttons with pending trade counts...");
+            $rootScope.updateTradeBtns();   
         }
 
         console.log("Polling for all books...");
@@ -115,6 +133,7 @@ ngApp.controller('allbooks', function($scope, $rootScope, $http) {
                 $scope.statusMessage = `Error returned by server: ${res.data}`;
             }
         );
+        
     });
     
     $scope.nextPage = function() {
