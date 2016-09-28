@@ -5,7 +5,7 @@ div(ng-controller="allbooks")
     div(id="book_grid")
         div(ng-repeat="book in books" repeat-done="initTooltips()" class="book")
             img(ng-src="{{book.imgUrl}}" class="bookimg" data-owner="{{book.bookOwner[0].userName}}")
-            span(class="tradeicon fa fa-exchange" ng-show="signedIn && book.bookOwner[0].userName !== myUsername && !tradePending" data-toggle="tooltip" title="Request Trade" ng-click="tradeBook($event)")
+            span(class="tradeicon fa fa-exchange" ng-show="signedIn && book.bookOwner[0].userName !== myUsername && !book.tradePending" data-toggle="tooltip" title="Request Trade" ng-click="tradeBook($event)")
     a(id="prev_button" ng-click="prevPage()" accesskey="<" ng-show="page > 1") 
         u <
         | Prev

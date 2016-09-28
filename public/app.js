@@ -27,7 +27,7 @@ ngApp.run(function($rootScope, $http) {
                 }
             },
             function(res) { //Error
-
+                console.error("Error fetching trade counts...");
             }
         );
     }
