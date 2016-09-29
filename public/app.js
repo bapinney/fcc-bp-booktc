@@ -31,6 +31,14 @@ ngApp.run(function($rootScope, $http) {
             }
         );
     }
+    
+    $rootScope.showMyTradeReqs = function() {
+        console.log("showmytr called...");
+    }
+    
+    $rootScope.showReqsForMe = function() {
+        console.log("showReqsForMe called...");
+    }
 });
 
 ngApp.config(function ($stateProvider, $urlRouterProvider) {

@@ -128,24 +128,31 @@ router.get('/getNTrades', loggedIn, function (req, res, next) {
     
     var nReqsForYou = null;
     var nYourReqs = null;
+    
+    var cb1Complete = false;
+    var cb2Complete = false;
     //Count User's Trade Requests (i.e., FROM User)
     Trade.count(
         {
             "fromUser.userName": req.user.username
         },
         function (err, count) {
-            console.log("At callback");
+            console.log("At callback 1");
             if (err) {
                 console.log(err);
                 res.status(500).json({error: err});
             }
             if (count) {
                 console.log(`Count is ${count}.`);
-                nReqsForYou = count; 
+                nReqsForYou = count;
+                cb1Complete = true;
+                sendResponse();
             }
             else {
                 console.log(`Count is ${count}.`);
                 nReqsForYou = 0;
+                cb1Complete = true;
+                sendResponse();
             }
         }
     );
@@ -165,17 +172,21 @@ router.get('/getNTrades', loggedIn, function (req, res, next) {
                 console.log(`Count is ${count}.`);
                 console.log(count);
                 nYourReqs = count;
+                cb2Complete = true;
                 sendResponse();
             }
             else {
                 nYourReqs = 0;
+                cb2Complete = true;
                 sendResponse();
             }
         }
     );
     
     var sendResponse = function() {
-        res.json({nYourReqs: nYourReqs, nReqsForYou: nReqsForYou});
+        if (cb1Complete && cb2Complete) {
+            res.json({nYourReqs: nYourReqs, nReqsForYou: nReqsForYou});
+        }
     }
     
 });

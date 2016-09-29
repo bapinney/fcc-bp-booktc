@@ -1,7 +1,7 @@
 div(id="trade_btns_div" ng-show="signedIn")
-    button(id="myReqsBtn" type="button")
+    button(id="myReqsBtn" ng-click="showMyTradeReqs()" type="button")
         span(class="fa fa-user")
         |&nbsp;My trade requests {{nMyReqs}}
-    button(id="reqsForMeBtn" type="button") 
+    button(id="reqsForMeBtn" ng-click="showReqsForMe()" type="button") 
         span(class="fa fa-inbox")
         |&nbsp;Requests for me {{nReqsForMe}}
