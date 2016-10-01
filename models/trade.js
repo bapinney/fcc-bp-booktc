@@ -3,10 +3,11 @@ mongoose.Promise = require('bluebird');
 var Schema = mongoose.Schema;
 var User = require('../models/user.js');
 var ObjectId = Schema.ObjectId;
+var Book = require('../models/book.js');
 
 var tradeSchema = new Schema({
     dateAdded     : { type: Date, default: Date.now },
-    bookId        : ObjectId,
+    book          : [Book],
     fromUser      : [{
         userProvider : String,
         userId       : Number,

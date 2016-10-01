@@ -190,6 +190,27 @@ router.get('/getNTrades', loggedIn, function (req, res, next) {
     }
     
 });
+
+router.get('/getMyTradeReqs', loggedIn, function(req, res, next) {
+    Trade.find({"toUser.userName":"mvocc"}, function(err, trades) {
+        
+        if (err) {
+            res.status(500).json({error: err});
+            return false;
+        }
+        if (trades) {
+            console.log("Printing trades");
+            console.dir(trades);
+            res.json(trades);
+        }
+        else {
+            res.json({});
+            return true;
+        }
+    })
+});
+
+
 router.get('/loginRtn', function(req, res, next) {
     res.render("loginrtn.pug");
 });
@@ -325,9 +346,8 @@ router.post('/requestTrade', loggedIn, function (req, res, next) {
     //Remember, the callback above is async, so we have to use a callback function to dictate what to do if we found a book to trade...
     var tradeContinue = function (req, res) {
         console.log("Book user has requested trade for has been found...");
-        console.log(foundBook.title);
-        //console.dir(foundBook);
-
+        var bookOwner = foundBook.bookOwner;
+        
         //Checking to see if trade is not already outstanding...
         Trade.findOne({
             bookId: foundBook.id,
@@ -341,9 +361,10 @@ router.post('/requestTrade', loggedIn, function (req, res, next) {
                 });
                 return false;
             } else {
+                
                 var tradeData = {
-                    bookId: foundBook.id,
-                    fromUser: foundBook.bookOwner,
+                    book: foundBook.doc,
+                    fromUser: bookOwner,
                     toUser: [{
                         userProvider: req.user.provider,
                         userId: req.user.id,
@@ -351,16 +372,19 @@ router.post('/requestTrade', loggedIn, function (req, res, next) {
                     }],
                     isCompleted: false
                 };
-                console.log("here is tradeData toUser");
-                console.dir(tradeData.toUser);
-                console.log("here is tradeData from User")
-                console.dir(tradeData.fromUser);
+                console.log("Here is tradeData");
+                console.dir(tradeData);
+                //console.log("here is tradeData toUser");
+                //console.dir(tradeData.toUser);
+                //console.log("here is tradeData from User")
+                //console.dir(tradeData.fromUser);
                 var trade = new Trade(tradeData);
                 
                 //Save the pending trade request to the journal.  If successful, mark the book as trade pending...
                 trade.save(function (err, result) {
                     if (err) {
-                        console.log("Error while saving");
+                        console.log(chalk.red("Error while saving"));
+                        console.dir(err);
                     }
                     if (result) {
                         console.log("Success while saving");

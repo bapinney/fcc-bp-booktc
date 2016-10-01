@@ -4,41 +4,10 @@ var ngApp = angular.module('fcc-bp-booktc', ['ui.router', 'ngAnimate']);
 
 ngApp.run(function($rootScope, $http) {
     console.log("%capp.js loaded","background-color:lightgreen; color:black; font-size:12px")
-    $rootScope.nMyReqs = null;
-    $rootScope.nReqsForMe = null;
-    
     $rootScope.signedIn = document.getElementById("sign-out") !== null;
     
-    $rootScope.updateTradeBtns = function() {
-        console.log("Update Trade Buttons called.");
-        var req = {
-            method: 'GET',
-            url: "getNTrades"
-        };
-        $http(req).then(
-            function(res) {
-                console.log("at http res")
-                console.dir(res);
-                if (res.data.hasOwnProperty("nReqsForYou")) {
-                    $rootScope.nReqsForMe = `(${res.data.nReqsForYou})`;
-                }
-                if (res.data.hasOwnProperty("nYourReqs")) {
-                    $rootScope.nMyReqs = `(${res.data.nYourReqs})`;
-                }
-            },
-            function(res) { //Error
-                console.error("Error fetching trade counts...");
-            }
-        );
-    }
     
-    $rootScope.showMyTradeReqs = function() {
-        console.log("showmytr called...");
-    }
-    
-    $rootScope.showReqsForMe = function() {
-        console.log("showReqsForMe called...");
-    }
+
 });
 
 ngApp.config(function ($stateProvider, $urlRouterProvider) {
@@ -111,8 +80,7 @@ ngApp.controller('allbooks', function($scope, $rootScope, $http) {
             sessionStorage.setItem("preLoginPage", document.location.hash);
         }
         else {
-            console.log("Updating trade buttons with pending trade counts...");
-            $rootScope.updateTradeBtns();   
+
         }
 
         console.log("Polling for all books...");
@@ -629,6 +597,76 @@ ngApp.directive('repeatDone', function () {
     };
 });
 
+ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
+    
+    console.log("Inside trade btns ctrl");
+    
+    var vm = this; //Used for relaying the trade data to the view...
+    
+    var slideToggle = function(cbFunc) {
+//        $("#tradeBtnsMenu").remove(); //In case it was already there...
+//        var tbm = document.createElement("div");
+//        tbm.id = "tradeBtnsMenu";
+//        tbm.style.height = 0;
+//        $("#trade_btns_div").append(tbm);
+        
+        if (typeof cbFunc == "function") {
+            $("#tradeBtnsMenu").transition({"height": 200}, 500, 'easeInOutCubic', cbFunc());
+        }
+        else {
+            $("#tradeBtnsMenu").transition({"height": 200}, 500, 'easeInOutCubic');
+        }
+    }
+    
+    $scope.showMyTradeReqs = function() {
+        console.log("At sMTR");
+        slideToggle($scope.queryMyTrades);
+    };
+    
+    $scope.queryMyTrades = function() {
+        $http({
+            method: "GET",
+            url: '/getMyTradeReqs'
+        }).then(function successCb(res) {
+            console.dir(res);
+            vm.trades = res.data;
+            $scope.trades = res.data;
+        }, function errorCb(res) {})
+    }
+    
+    $scope.showReqsForMe = function() {
+        console.log(223434);
+    };
+    
+    $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
+        console.log("Updating trade buttons with pending trade counts...");
+        $rootScope.updateTradeBtns();   
+    });
+    
+    //$rootScope because areas outside of this controller will call it
+    $rootScope.updateTradeBtns = function() {
+        console.log("Update Trade Buttons called.");
+        var req = {
+            method: 'GET',
+            url: "getNTrades"
+        };
+        $http(req).then(
+            function(res) {
+                console.log("at http res")
+                console.dir(res);
+                if (res.data.hasOwnProperty("nReqsForYou")) {
+                    $rootScope.nReqsForMe = `(${res.data.nReqsForYou})`;
+                }
+                if (res.data.hasOwnProperty("nYourReqs")) {
+                    $rootScope.nMyReqs = `(${res.data.nYourReqs})`;
+                }
+            },
+            function(res) { //Error
+                console.error("Error fetching trade counts...");
+            }
+        );
+    }
+})
 
 $(function() { //Document ready
     //Also works when an elements acceskey is used (instead of click)

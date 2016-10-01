@@ -1,7 +1,9 @@
-div(id="trade_btns_div" ng-show="signedIn")
+div(id="trade_btns_div" ng-controller="TradeBtnsCtrl" ng-show="signedIn")
     button(id="myReqsBtn" ng-click="showMyTradeReqs()" type="button")
         span(class="fa fa-user")
         |&nbsp;My trade requests {{nMyReqs}}
     button(id="reqsForMeBtn" ng-click="showReqsForMe()" type="button") 
         span(class="fa fa-inbox")
         |&nbsp;Requests for me {{nReqsForMe}}
+    div(id="tradeBtnsMenu")
+        div(ng-repeat="trade in trades") From {{trade.fromUser[0].userName}}: {{trade.book}}
