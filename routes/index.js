@@ -37,6 +37,30 @@ router.get('/', function(req, res, next) {
     }
 });
 
+//POST
+router.post('/acceptTrade', loggedIn, function (req, res, next) {
+
+    Trade.findOne({
+        _id: req.body.id
+    }, function (err, trade) {
+        if (err) {
+            console.log(chalk.bgRed.white("Error: ") + " " + err);
+            res.status(500).json({
+                error: err
+            });
+        }
+        else if (trade) {
+            console.log(chalk.green("Found trade to be accepted"));
+            res.json({status: "found", trade: trade});
+        }
+        else {
+            console.log(chalk.red("Not Found"));
+            res.json({error: "notfound"});
+        }
+
+    });
+});
+
 router.get('/addbook', loggedIn ,function(req, res, next) {
     res.render("addbook.pug");
 });
@@ -192,19 +216,18 @@ router.get('/getNTrades', loggedIn, function (req, res, next) {
 });
 
 router.get('/getMyTradeReqs', loggedIn, function(req, res, next) {
-    Trade.find({"toUser.userName":"mvocc"}, function(err, trades) {
-        
+    Trade.find({"toUser.userName":req.user.username}, function(err, trades) {        
         if (err) {
             res.status(500).json({error: err});
             return false;
         }
         if (trades) {
-            console.log("Printing trades");
-            console.dir(trades);
+            console.log("Returning trades...");
             res.json(trades);
+            return true;
         }
         else {
-            res.json({});
+            res.json({}); //Return an empty object if we have no trades
             return true;
         }
     })
@@ -346,6 +369,15 @@ router.post('/requestTrade', loggedIn, function (req, res, next) {
     //Remember, the callback above is async, so we have to use a callback function to dictate what to do if we found a book to trade...
     var tradeContinue = function (req, res) {
         console.log("Book user has requested trade for has been found...");
+        console.dir(foundBook);
+        console.dir("---");
+        console.log(foundBook.id)
+        console.log(typeof foundBook.id)
+        console.log(foundBook._id)
+        console.log(typeof foundBook._id)
+        console.log(foundBook.id._id)
+        console.log(typeof foundBook.id._id)
+
         var bookOwner = foundBook.bookOwner;
         
         //Checking to see if trade is not already outstanding...
@@ -363,7 +395,10 @@ router.post('/requestTrade', loggedIn, function (req, res, next) {
             } else {
                 
                 var tradeData = {
-                    book: foundBook.doc,
+                    book: {
+                        id: foundBook.id, 
+                        title: foundBook.title   
+                           },
                     fromUser: bookOwner,
                     toUser: [{
                         userProvider: req.user.provider,

@@ -604,24 +604,65 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
     var vm = this; //Used for relaying the trade data to the view...
     
     var slideToggle = function(cbFunc) {
-//        $("#tradeBtnsMenu").remove(); //In case it was already there...
-//        var tbm = document.createElement("div");
-//        tbm.id = "tradeBtnsMenu";
-//        tbm.style.height = 0;
-//        $("#trade_btns_div").append(tbm);
-        
-        if (typeof cbFunc == "function") {
-            $("#tradeBtnsMenu").transition({"height": 200}, 500, 'easeInOutCubic', cbFunc());
+        if (parseInt($("#tradeBtnsMenu").css("height")) == 0) {
+            if (typeof cbFunc == "function") {
+                $("#tradeBtnsMenu").transition({"height": 200, "padding": "10px"}, 2500, 'easeInOutCubic', cbFunc());
+            }
+            else {
+                $("#tradeBtnsMenu").transition({"height": 200, "padding": "10px"}, 2500, 'easeInOutCubic');
+            }            
         }
         else {
-            $("#tradeBtnsMenu").transition({"height": 200}, 500, 'easeInOutCubic');
+            if (typeof cbFunc == "function") {
+                $("#tradeBtnsMenu").transition({"height": 0, "padding": 0}, 2500, 'easeInOutCubic', cbFunc());
+            }
+            else {
+                $("#tradeBtnsMenu").transition({"height": 0, "padding": 0}, 2500, 'easeInOutCubic');
+            }
         }
+
+    }
+    
+    $scope.approveTrade = function(event, trade) {
+        console.log("Accept called");
+        console.dir(event);
+        console.dir(trade);
+        $http({
+            method: "POST",
+            url: '/acceptTrade',
+            data: {
+                id: trade._id
+            } 
+        }).then(function successCb(res) {
+            console.dir(res);
+        }, function errorCb(res) {
+            console.dir(res);
+        })
+        event.target.parentElement.classList.add("ti-pending");
+    }
+    
+    $scope.declineTrade = function(trade) {
+        console.log("Decline called");
+        console.dir(trade);
+        
     }
     
     $scope.showMyTradeReqs = function() {
         console.log("At sMTR");
         slideToggle($scope.queryMyTrades);
     };
+        
+    $scope.queryReqsForMe = function() {
+        $http({
+            method: "GET",
+            url: '/getMyTradeReqs'
+        }).then(function successCb(res) {
+            console.dir(res);
+            //vm.trades = res.data;
+            $scope.trades = res.data;
+        }, function errorCb(res) {})
+    }        
+
     
     $scope.queryMyTrades = function() {
         $http({
@@ -629,14 +670,17 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
             url: '/getMyTradeReqs'
         }).then(function successCb(res) {
             console.dir(res);
-            vm.trades = res.data;
             $scope.trades = res.data;
         }, function errorCb(res) {})
     }
     
     $scope.showReqsForMe = function() {
-        console.log(223434);
+        console.log("At sRFM");
+        slideToggle($scope.queryReqsForMe);        
+
     };
+    
+    
     
     $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
         console.log("Updating trade buttons with pending trade counts...");

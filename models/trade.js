@@ -7,7 +7,9 @@ var Book = require('../models/book.js');
 
 var tradeSchema = new Schema({
     dateAdded     : { type: Date, default: Date.now },
-    book          : [Book],
+    book          : {
+        id : Schema.Types.ObjectId,
+        title: String}, //http://mongoosejs.com/docs/schematypes.html
     fromUser      : [{
         userProvider : String,
         userId       : Number,
