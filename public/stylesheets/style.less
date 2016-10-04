@@ -237,6 +237,10 @@ main.ng-enter-active {
     transition: all 500ms ease-in-out;
 }
 
+.ti-error {
+    background-color: hsl(0, saturation(@bg-col), lightness(@bg-col));
+}
+
 .ti-pending {
     background-color: hsl(54, saturation(@bg-col), lightness(@bg-col));
 }
@@ -251,6 +255,10 @@ main.ng-enter-active {
     color: darkred;
     margin-left: 10px;
     text-shadow: 0px 0px 10px red;
+}
+
+.username-info {
+    text-decoration: underline;
 }
 
 
@@ -375,7 +383,6 @@ main.ng-enter-active {
     box-shadow: inset 0px 0px 4px 1px black;
     margin-top: 4px;
     overflow: auto;
-    width: 500px;
 }
 
 #welcome {

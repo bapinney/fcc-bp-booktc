@@ -603,28 +603,56 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
     
     var vm = this; //Used for relaying the trade data to the view...
     
+    $scope.currentPane = null;
+    
     var slideToggle = function(cbFunc) {
-        if (parseInt($("#tradeBtnsMenu").css("height")) == 0) {
+        if ($scope.requestedPane == $scope.currentPane) {
             if (typeof cbFunc == "function") {
-                $("#tradeBtnsMenu").transition({"height": 200, "padding": "10px"}, 2500, 'easeInOutCubic', cbFunc());
+                $("#tradeBtnsMenu").transition({"height": 0, "padding": 0}, 2500, 'easeInOutCubic', function() {
+                    $scope.currentPane = null;
+                    cbFunc();
+                });
             }
             else {
-                $("#tradeBtnsMenu").transition({"height": 200, "padding": "10px"}, 2500, 'easeInOutCubic');
+                $("#tradeBtnsMenu").transition({"height": 0, "padding": 0}, 2500, 'easeInOutCubic', function() {
+                    $scope.currentPane = null;
+                });
+            }
+        }
+        else if ($scope.currentPane == null) {
+            if (parseInt($("#tradeBtnsMenu").css("height")) == 0) {
+                if (typeof cbFunc == "function") {
+                    $("#tradeBtnsMenu").transition({"height": 200, "padding": "10px"}, 2500, 'easeInOutCubic', function() {
+                        $scope.currentPane = $scope.requestedPane;
+                        cbFunc();
+                    });
+                }
+                else {
+                    $("#tradeBtnsMenu").transition({"height": 200, "padding": "10px"}, 2500, 'easeInOutCubic', function() {
+                        $scope.currentPane = $scope.requestedPane;
+                    });
+                }            
             }            
         }
         else {
+            console.log("Last ELSE");
             if (typeof cbFunc == "function") {
-                $("#tradeBtnsMenu").transition({"height": 0, "padding": 0}, 2500, 'easeInOutCubic', cbFunc());
+                $("#tradeBtnsMenu").transition({"height": 0, "padding": 0}, 2500, 'easeInOutCubic', function() {
+                    $scope.currentPane = null;
+                    cbFunc();
+                });
             }
             else {
-                $("#tradeBtnsMenu").transition({"height": 0, "padding": 0}, 2500, 'easeInOutCubic');
+                $("#tradeBtnsMenu").transition({"height": 0, "padding": 0}, 2500, 'easeInOutCubic', function() {
+                    $scope.currentPane = null;
+                });
             }
         }
-
     }
     
     $scope.approveTrade = function(event, trade) {
         console.log("Accept called");
+        event.target.parentElement.classList.add("ti-pending");
         console.dir(event);
         console.dir(trade);
         $http({
@@ -638,27 +666,50 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
         }, function errorCb(res) {
             console.dir(res);
         })
+    }
+    
+    $scope.declineTrade = function(event, trade) {
+        console.log("Decline called");
+        event.target.parentElement.classList.add("ti-pending");
+        console.dir(event);
+        console.dir(trade);
+        $http({
+            method: "POST",
+            url: '/declineTrade',
+            data: {
+                id: trade._id
+            }
+        }).then(function successCb(res) {
+            console.dir(res)
+            if (res.data.hasOwnProperty("result") && res.data.result == "success") {
+                angular.element(event.target.parentElement).remove();
+                $rootScope.updateTradeBtns();
+            }
+        }, function errorCb(res) {
+            console.dir(res);
+        })
         event.target.parentElement.classList.add("ti-pending");
     }
     
-    $scope.declineTrade = function(trade) {
-        console.log("Decline called");
-        console.dir(trade);
-        
+    $scope.removeTradeEle = function(tradeDiv) {
+        if (tradeDiv.tagName == "DIV" && angular.element(tradeDiv).scope().hasOwnProperty("trade")) {
+            angular.element(tradeDiv).remove();
+        }
     }
     
     $scope.showMyTradeReqs = function() {
         console.log("At sMTR");
-        slideToggle($scope.queryMyTrades);
+        $scope.requestedPane = "showMyTradeReqs";
+        slideToggle();
+        $scope.queryMyTrades();
     };
         
     $scope.queryReqsForMe = function() {
         $http({
             method: "GET",
-            url: '/getMyTradeReqs'
+            url: '/getTradeReqsForMe'
         }).then(function successCb(res) {
             console.dir(res);
-            //vm.trades = res.data;
             $scope.trades = res.data;
         }, function errorCb(res) {})
     }        
@@ -676,8 +727,9 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
     
     $scope.showReqsForMe = function() {
         console.log("At sRFM");
-        slideToggle($scope.queryReqsForMe);        
-
+        $scope.requestedPane = "showReqsForMe";
+        slideToggle();
+        $scope.queryReqsForMe();
     };
     
     

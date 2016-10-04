@@ -36,7 +36,6 @@ router.get('/', function(req, res, next) {
         res.render('shell', { title: req.app.get("title"), username: undefined });
     }
 });
-
 //POST
 router.post('/acceptTrade', loggedIn, function (req, res, next) {
 
@@ -48,18 +47,66 @@ router.post('/acceptTrade', loggedIn, function (req, res, next) {
             res.status(500).json({
                 error: err
             });
-        }
-        else if (trade) {
+        } else if (trade) {
             console.log(chalk.green("Found trade to be accepted"));
-            res.json({status: "found", trade: trade});
-        }
-        else {
+            console.log(req.user.username + " == " + trade.fromUser[0].userName + " && " + req.user.provider + " == " + trade.fromUser[0].userProvider);
+
+            if (req.user.username == trade.fromUser[0].userName && req.user.provider == trade.fromUser[0].userProvider) {
+                //res.json({status: "found", trade: trade});
+                Book.findOne({
+                    _id: trade.book.id
+                }, function (err, book) {
+                    if (err) {
+                        res.json({
+                            error: err
+                        });
+                    }
+                    if (book) {
+                        book.bookOwner[0].userName = req.user.username;
+                        book.bookOwner[0].userId = req.user.id;
+                        book.bookOwner[0].userProvider = req.user.provider;
+                        book.tradePending = false;
+                        book.save(function (err, book) {
+                            if (err) {
+                                console.log(chalk.red("Error: ") + err);
+                                res.json({
+                                    error: err
+                                });
+                            }
+                            if (book) {
+                                trade.isCompleted = true;
+                                trade.save(function (err, trade) {
+                                    if (err) {
+                                        console.log(chalk.reg("Error: ") + err);
+                                    }
+                                    res.json({
+                                        result: "success"
+                                    });
+                                });
+                            }
+                        })
+                    } else {
+                        res.json({
+                            error: "Book not found"
+                        });
+                    }
+                });
+            }
+            else {
+                res.status(500).json({
+                    error: "Not Authorized"
+                })
+            }
+        } else {
             console.log(chalk.red("Not Found"));
-            res.json({error: "notfound"});
+            res.json({
+                error: "notfound"
+            });
         }
 
     });
 });
+
 
 router.get('/addbook', loggedIn ,function(req, res, next) {
     res.render("addbook.pug");
@@ -110,6 +157,41 @@ router.get('/allbooks', function(req, res, next) {
     res.render("allbooks.pug");
 })
 
+router.post('/declineTrade', loggedIn, function(req, res, next) {
+    Trade.findOne({
+        _id: req.body.id
+    }, function(err, trade) {
+        if (err) {
+            console.log(chalk.bgRed.white("Error: ") + " " + err);
+            res.status(500).json({
+                error: err
+            });
+        }
+        else if (trade) {
+            console.log(chalk.green("Found trade to be declined"));
+            
+            if (( //Either the giver or the recipent can cancel the trade
+                req.user.username == trade.toUser[0].userName && req.user.provider == trade.toUser[0].userProvider) || 
+                (
+                req.user.username == trade.fromUser[0].userName && req.user.provider == trade.fromUser[0].userProvider
+                )) 
+            {
+                console.log("Book ID is " + trade.book.id);
+                console.dir(trade);
+                var result = trade.remove();
+                if (result) {
+                    console.log("Remove successful");
+                    res.json({result: "success"});
+                }
+            }    
+        }
+        else {
+            res.json({error: "not found"});
+        }
+    });
+});
+           
+           
 router.post('/getbooks', function(req, res, next) {
     console.log(chalk.bgBlue.white("At getbooks!"));
     if (typeof req.body.page !== "undefined") {
@@ -158,7 +240,8 @@ router.get('/getNTrades', loggedIn, function (req, res, next) {
     //Count User's Trade Requests (i.e., FROM User)
     Trade.count(
         {
-            "fromUser.userName": req.user.username
+            "fromUser.userName": req.user.username,
+            isCompleted: false
         },
         function (err, count) {
             console.log("At callback 1");
@@ -184,7 +267,8 @@ router.get('/getNTrades', loggedIn, function (req, res, next) {
     //Trades FOR User (i.e., TO user)
     var reqsForUser = Trade.count(
         {
-            "toUser.userName": req.user.username
+            "toUser.userName": req.user.username,
+            isCompleted: false
         },
         function (err, count) {
             console.log("At callback 2");
@@ -215,8 +299,32 @@ router.get('/getNTrades', loggedIn, function (req, res, next) {
     
 });
 
+router.get('/getTradeReqsForMe', loggedIn, function(req, res, next) {
+    Trade.find(
+        {"fromUser.userName":req.user.username,
+         isCompleted: false
+        }, function(err, trades) {        
+        if (err) {
+            res.status(500).json({error: err});
+            return false;
+        }
+        if (trades) {
+            console.log("Returning trades...");
+            res.json(trades);
+            return true;
+        }
+        else {
+            res.json({}); //Return an empty object if we have no trades
+            return true;
+        }
+    })
+});
+
 router.get('/getMyTradeReqs', loggedIn, function(req, res, next) {
-    Trade.find({"toUser.userName":req.user.username}, function(err, trades) {        
+    Trade.find(
+        {"toUser.userName":req.user.username,
+         isCompleted: false
+        }, function(err, trades) {        
         if (err) {
             res.status(500).json({error: err});
             return false;
