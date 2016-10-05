@@ -180,8 +180,17 @@ router.post('/declineTrade', loggedIn, function(req, res, next) {
                 console.dir(trade);
                 var result = trade.remove();
                 if (result) {
-                    console.log("Remove successful");
-                    res.json({result: "success"});
+                    console.log("Remove trade successful");
+                    Book.findOneAndUpdate({_id: trade.book.id}, {$set: {tradePending: false}}, {new:true}, function(err, doc) {
+                        if (err) {
+                            console.log(chalk.red(err));
+                            res.status(500).json({error: "Error while updating trade status"});
+                            return false;
+                        }
+                        console.log("TradePending set to false");
+                        console.dir(doc);
+                        res.json({result: "success"});
+                    })
                 }
             }    
         }

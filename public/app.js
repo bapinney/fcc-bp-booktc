@@ -200,6 +200,7 @@ ngApp.controller('allbooks', function($scope, $rootScope, $http) {
                     console.dir($event.target);
                     $($event.target).fadeOut();
                     $scope.updateTradeBtns(); //Show the new counts in the trade buttons...
+                    $scope.$emit("UpdateMyTradeReqs",{});
                 }
             },
             function(res) { //Error
@@ -683,7 +684,8 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
             console.dir(res)
             if (res.data.hasOwnProperty("result") && res.data.result == "success") {
                 angular.element(event.target.parentElement).remove();
-                $rootScope.updateTradeBtns();
+                $rootScope.$emit("UpdateMyTradeReqs", {});
+                $rootScope.$emit("UpdateTradeButtons", {});
             }
         }, function errorCb(res) {
             console.dir(res);
@@ -738,6 +740,16 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
         console.log("Updating trade buttons with pending trade counts...");
         $rootScope.updateTradeBtns();   
     });
+    
+    $rootScope.$on("UpdateTradeButtons", function() {
+        console.log("Received UTB broadcast")
+        $scope.updateTradeBtns();
+    })
+    
+    $rootScope.$on("UpdateMyTradeReqs", function() {
+        console.log("Received UBTR broadcast");
+        $scope.queryMyTrades();
+    })
     
     //$rootScope because areas outside of this controller will call it
     $rootScope.updateTradeBtns = function() {
