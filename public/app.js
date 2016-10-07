@@ -606,7 +606,8 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
     
     $scope.currentPane = null;
     
-    var slideToggle = function(cbFunc) {
+    $scope.slideToggle = function(cbFunc) {
+        console.log("Begin: $scope.currentPane is " + $scope.currentPane);
         if ($scope.requestedPane == $scope.currentPane) {
             if (typeof cbFunc == "function") {
                 $("#tradeBtnsMenu").transition({"height": 0, "padding": 0}, 2500, 'easeInOutCubic', function() {
@@ -621,17 +622,17 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
             }
         }
         else if ($scope.currentPane == null) {
+            console.log("currentPange is null");
             if (parseInt($("#tradeBtnsMenu").css("height")) == 0) {
                 if (typeof cbFunc == "function") {
                     $("#tradeBtnsMenu").transition({"height": 200, "padding": "10px"}, 2500, 'easeInOutCubic', function() {
                         $scope.currentPane = $scope.requestedPane;
-                        cbFunc();
+                        cbFunc();                        
                     });
                 }
                 else {
-                    $("#tradeBtnsMenu").transition({"height": 200, "padding": "10px"}, 2500, 'easeInOutCubic', function() {
-                        $scope.currentPane = $scope.requestedPane;
-                    });
+                    $("#tradeBtnsMenu").transition({"height": 200, "padding": "10px"}, 2500, 'easeInOutCubic')
+                    $scope.currentPane = $scope.requestedPane;
                 }            
             }            
         }
@@ -663,7 +664,16 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
                 id: trade._id
             } 
         }).then(function successCb(res) {
-            console.dir(res);
+            if (res.data.hasOwnProperty("result") && res.data.result == "success") {
+                angular.element(event.target.parentElement).remove();
+                if ($scope.currentPane == "showReqsForMe") {
+                    $rootScope.$emit("UpdateReqsForMe")
+                }
+                else {
+                    $rootScope.$emit("UpdateMyTradeReqs", {});
+                }
+                $rootScope.updateTradeBtns();
+            }
         }, function errorCb(res) {
             console.dir(res);
         })
@@ -684,7 +694,13 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
             console.dir(res)
             if (res.data.hasOwnProperty("result") && res.data.result == "success") {
                 angular.element(event.target.parentElement).remove();
-                $rootScope.$emit("UpdateMyTradeReqs", {});
+                console.log($scope.currentPane + " is the current pane");
+                if ($scope.currentPane == "showReqsForMe") {
+                    $rootScope.$emit("UpdateReqsForMe")
+                }
+                else {
+                    $rootScope.$emit("UpdateMyTradeReqs", {});
+                }
                 $rootScope.$emit("UpdateTradeButtons", {});
             }
         }, function errorCb(res) {
@@ -702,8 +718,19 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
     $scope.showMyTradeReqs = function() {
         console.log("At sMTR");
         $scope.requestedPane = "showMyTradeReqs";
-        slideToggle();
-        $scope.queryMyTrades();
+        if ($scope.currentPane == null) {
+            $scope.slideToggle();
+            $scope.queryMyTrades();
+        }
+        else if ($scope.currentPane !== "showMyTradeReqs") {
+            $scope.slideToggle(function() {
+                $scope.queryMyTrades();
+                $scope.slideToggle();
+            })
+        }
+        else {
+            $scope.slideToggle();
+        }
     };
         
     $scope.queryReqsForMe = function() {
@@ -730,11 +757,42 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
     $scope.showReqsForMe = function() {
         console.log("At sRFM");
         $scope.requestedPane = "showReqsForMe";
-        slideToggle();
-        $scope.queryReqsForMe();
+        if ($scope.currentPane == null) {
+            $scope.slideToggle();
+            $scope.queryReqsForMe();
+        }
+        else if ($scope.currentPane !== "showReqsForMe") {
+            $scope.slideToggle(function() {
+                $scope.queryReqsForMe();
+                $scope.slideToggle();
+            })
+        }
+        else {
+            $scope.slideToggle();
+        }
     };
     
-    
+    $scope.showUser = function(event, user) {
+        angular.element(".profile-info").remove();
+        if ($scope.lastShowUserTarget == event.target) {
+            return false;
+            $scope.lastShowUserTarget = null;
+        }
+        else {
+            $scope.lastShowUserTarget = event.target;
+            $http({url: "getProfile/" + user.userName}).then(
+                function(res) {
+                    var curDiv = angular.element(event.target.parentElement);
+                    var city = (res.data.city == null ? "<i>(empty)</i>" : res.data.city);
+                    var state = (res.data.state == null ? "<i>(empty)</i>" : res.data.state);
+                    var fullname = (res.data.fullname == null ? "<i>(empty)</i>" : res.data.fullname);
+                    var profInfo = angular.element(`<div>${user.userName} - Full Name: ${fullname} - City: ${city} - State: ${state}</div>`);
+                    profInfo[0].classList.add("profile-info");
+                    curDiv.append(profInfo);
+                }
+            );
+        }
+    }
     
     $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
         console.log("Updating trade buttons with pending trade counts...");
@@ -747,8 +805,13 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
     })
     
     $rootScope.$on("UpdateMyTradeReqs", function() {
-        console.log("Received UBTR broadcast");
+        console.log("Received UMTR broadcast");
         $scope.queryMyTrades();
+    })
+    
+    $rootScope.$on("UpdateReqsForMe", function() {
+        console.log("Received URFM broadcast");
+        $scope.queryReqsForMe();
     })
     
     //$rootScope because areas outside of this controller will call it

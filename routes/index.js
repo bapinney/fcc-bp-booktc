@@ -62,9 +62,9 @@ router.post('/acceptTrade', loggedIn, function (req, res, next) {
                         });
                     }
                     if (book) {
-                        book.bookOwner[0].userName = req.user.username;
-                        book.bookOwner[0].userId = req.user.id;
-                        book.bookOwner[0].userProvider = req.user.provider;
+                        book.bookOwner[0].userName = trade.toUser[0].userName;
+                        book.bookOwner[0].userId = trade.toUser[0].userId;
+                        book.bookOwner[0].userProvider = trade.toUser[0].userProvider;
                         book.tradePending = false;
                         book.save(function (err, book) {
                             if (err) {
@@ -350,6 +350,18 @@ router.get('/getMyTradeReqs', loggedIn, function(req, res, next) {
     })
 });
 
+router.get('/getProfile/:username', loggedIn, function(req, res, next) {
+    User.findOne({
+        username: req.params.username }, function(err, user) {
+            if (err) {
+                res.error("Error: " + err);
+            }
+            if (user) {
+                res.json(user.profile);
+            }
+        });
+});
+
 
 router.get('/loginRtn', function(req, res, next) {
     res.render("loginrtn.pug");
@@ -417,7 +429,7 @@ router.get('/profile', loggedIn, function(req, res, next) {
     });
 })
 
-// Profile Info
+// Profile Info - Current User
 router.get('/profileinfo', loggedIn, function(req, res, next) {
     console.log(chalk.cyan("At profileinfo..."));
     User.findOne({
@@ -486,14 +498,7 @@ router.post('/requestTrade', loggedIn, function (req, res, next) {
     //Remember, the callback above is async, so we have to use a callback function to dictate what to do if we found a book to trade...
     var tradeContinue = function (req, res) {
         console.log("Book user has requested trade for has been found...");
-        console.dir(foundBook);
-        console.dir("---");
-        console.log(foundBook.id)
-        console.log(typeof foundBook.id)
-        console.log(foundBook._id)
-        console.log(typeof foundBook._id)
-        console.log(foundBook.id._id)
-        console.log(typeof foundBook.id._id)
+        //console.dir(foundBook);
 
         var bookOwner = foundBook.bookOwner;
         

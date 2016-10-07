@@ -11,9 +11,9 @@ div(id="trade_btns_div" ng-controller="TradeBtnsCtrl" ng-show="signedIn")
         |sts for me {{nReqsForMe}}
     div(id="tradeBtnsMenu" style="height:0px;")
         div(class="trade-item" ng-repeat="trade in trades")
-            span(class="username-info") {{trade.fromUser[0].userName}}
+            span(class="username-info" ng-click="showUser($event, trade.fromUser[0])" tabindex="0") {{trade.fromUser[0].userName}}
             |&rarr;
-            span(class="username-info") {{trade.toUser[0].userName}}
+            span(class="username-info" ng-click="showUser($event, trade.toUser[0])" tabindex="0") {{trade.toUser[0].userName}}
             |:{{trade.book.title}}
-            a(class="fa fa-check trade-check" ng-hide="currentPane == \"showMyTradeReqs\"" ng-click="approveTrade($event, trade)" title="Approve Trade")
-            a(class="fa fa-remove trade-remove" ng-click="declineTrade($event, trade)" title="Decline Trade")
+            a(class="fa fa-check trade-check" ng-hide="currentPane == \"showMyTradeReqs\"" ng-click="approveTrade($event, trade)" data-toggle="tooltip" title="Approve Trade" tabindex="0")
+            a(class="fa fa-remove trade-remove" ng-click="declineTrade($event, trade)" data-toggle="tooltip" title="Decline Trade" tabindex="0")
