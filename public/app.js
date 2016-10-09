@@ -11,7 +11,6 @@ ngApp.run(function($rootScope, $http) {
 });
 
 ngApp.config(function ($stateProvider, $urlRouterProvider) {
-    console.log("Inside router");
     $urlRouterProvider.otherwise('/home'); //Where we go if there is no route
 
     // templateProvider: Provider function that returns HTML content string. See http://angular-ui.github.io/ui-router/site/#/api/ui.router.state.$stateProvider
@@ -58,7 +57,6 @@ ngApp.config(function ($stateProvider, $urlRouterProvider) {
 });
 
 ngApp.controller('allbooks', function($scope, $rootScope, $http) {
-    console.log("At allbooks");
     $scope.signedIn = $rootScope.signedIn;
     
     var itemsPerPage = 8;
@@ -66,24 +64,19 @@ ngApp.controller('allbooks', function($scope, $rootScope, $http) {
     $scope.error = false;
     $scope.statusMessage = "Loading books...";
     $scope.initTooltips = function() {
-        console.log("initTooltips called");
         $('[data-toggle="tooltip"]').tooltip(); 
     }
     
     $scope.$on('$stateChangeSuccess', function() { 
-        console.log("%c At allbooks $sCS!", "color:blue; font-size:16px");
         var grid = angular.element("#book-grid");
         $scope.myUsername = angular.element('#li-sign-out').data('username');
 
         if (!$rootScope.signedIn) {
-            console.log("Setting preLoginPage");
             sessionStorage.setItem("preLoginPage", document.location.hash);
         }
         else {
 
         }
-
-        console.log("Polling for all books...");
       
         var req = {
             method: 'POST',
@@ -93,17 +86,13 @@ ngApp.controller('allbooks', function($scope, $rootScope, $http) {
         
         $http(req).then(
             function(res) { //Success function
-                console.log("Setting pollingCompleted to true...");
-                console.dir(res);
                 $scope.pollingCompleted = true;
                 $scope.error = false;
-                //$scope.statusMessage = "should not show..."; -- Works
                 $scope.pages = res.data.pages;
                 $scope.page = res.data.page;
                 $scope.books = res.data.data;
             },
             function(res) { //Error function text is in res.data
-                console.log("At error func");
                 $scope.pollingCompleted = true;
                 $scope.error = true;
                 $scope.statusMessage = `Error returned by server: ${res.data}`;
@@ -113,7 +102,6 @@ ngApp.controller('allbooks', function($scope, $rootScope, $http) {
     });
     
     $scope.nextPage = function() {
-        console.log("Next Page clicked");
         if (angular.element("#next_button").css("display") == "none") {
             return false;
         }
@@ -129,8 +117,6 @@ ngApp.controller('allbooks', function($scope, $rootScope, $http) {
                 
         $http(req).then(
             function(res) {
-                console.log("at http req then");
-                console.dir(res);
                 $scope.pages = res.data.pages;
                 $scope.page = res.data.page;
                 $scope.books = res.data.data;
@@ -145,7 +131,6 @@ ngApp.controller('allbooks', function($scope, $rootScope, $http) {
     };
     
     $scope.prevPage = function() {
-        console.log("Prev Page clicked");
         if (angular.element("#prev_button").css("display") == "none") {
             return false;
         }
@@ -161,8 +146,6 @@ ngApp.controller('allbooks', function($scope, $rootScope, $http) {
                 
         $http(req).then(
             function(res) {
-                console.log("at http req then");
-                console.dir(res);
                 $scope.pages = res.data.pages;
                 $scope.page = res.data.page;
                 $scope.books = res.data.data;
@@ -177,11 +160,8 @@ ngApp.controller('allbooks', function($scope, $rootScope, $http) {
     };
     
     $scope.tradeBook = function($event) {
-        console.log("tradeBook called...");
         $scope.error = false;
-        console.dir($event);
         var book = angular.element($event.target).scope().book;
-        console.dir(book);
         if (typeof book == "undefined" || typeof book._id == "undefined") {
             console.log("%cUnable to find book data in JSON", "background-color: red; color: white; font-size:16px;");
             return false;
@@ -195,24 +175,16 @@ ngApp.controller('allbooks', function($scope, $rootScope, $http) {
         
         $http(req).then(
             function(res) {
-                console.log("At res");
                 if (res.hasOwnProperty("data") && res.data.hasOwnProperty("status") && res.data.status == "success") {
-                    console.dir($event.target);
                     $($event.target).fadeOut();
                     $scope.updateTradeBtns(); //Show the new counts in the trade buttons...
                     $scope.$emit("UpdateMyTradeReqs",{});
                 }
             },
             function(res) { //Error
-                console.error("At res error");
-                console.dir(res);
                 if (res.hasOwnProperty("data") && res.data.hasOwnProperty("status") && res.data.hasOwnProperty("message") && res.data.status == "error") {
-                    console.log("Printing error message");
                     $scope.error = true;
                     $scope.statusMessage = res.data.message;
-                }
-                else {
-                    console.log("if was false");
                 }
             }
         )
@@ -227,7 +199,6 @@ ngApp.directive('dlEnter', function() {
             var keyCode = event.which || event.keyCode; //Save the value of the one that isn't null
             
             if (keyCode === 13) {// Enterkey
-                console.log("Enter key was pressed! :D");
                 scope.$apply(function() {
                     scope.$eval(attributes.dlEnter);
                 });
@@ -239,7 +210,6 @@ ngApp.directive('dlEnter', function() {
 })
 
 ngApp.controller('addbook', function($scope, $http, $state) {
-    console.log("At allbooks");
     
     $scope.add_disabled = true; //Keep the button disabled at the start
     $scope.book = {};
@@ -249,7 +219,6 @@ ngApp.controller('addbook', function($scope, $http, $state) {
     
     //Gets fired on page change within app or when refreshed anew
     $scope.$on('$stateChangeSuccess', function() { 
-        console.log("%c At addbook $sCS!", "color:blue");
         //Sets focus to the Book Title INPUT, the first input on this page
         
         angular.element("#title_input").focus();
@@ -259,48 +228,34 @@ ngApp.controller('addbook', function($scope, $http, $state) {
      * Dummy function used to prevent default event responses.  Used in SELECT to prevent the enter key from causing a form submit
      */
     $scope.preventDefault = function() {
-        console.log("At pD");
     }
     
     $scope.searchButtonClick = function() {
-        console.log("Search button clicked...");
         if ($("#status_text").hasClass("status_text_error")) {
-            console.log("Removing status_text_error");
             $("#status_text").removeClass("status_text_error");
         }
-        console.log("Adding UI feedback to button...");
         $("#search_button").addClass("searching-indicator");
-        console.log("Disabling the Add Book button, in case this is a secondary search...");
         $scope.add_disabled = true;
         var searchQuery = $("#title_input")[0].value;
-        console.log(`SearchQuery is ${searchQuery}`);
         var queryURI = gBooksURI + encodeURIComponent(searchQuery);
-        console.log(`queryURI is ${queryURI}`);
         $("#status_text").text("Searching for books...");
                 
         /* Just so I don't forget... The $http legacy promise methods success and error have been deprecated. Use the standard "then" method instead. */
         
         $http.get(queryURI)
         .then(function(response) {
-            console.dir(response);
             if (response.data.hasOwnProperty("items")) {
-                console.log("We have items!!!");
                 //Hide the status text...
                 $("#status_text").text("");
-                console.log(response.data.items.length);
-                console.log("Setting $scope.searchResults to response.data");
                 $scope.searchResults = response.data;
-                console.log("Calling updateResultsList...");
                 $scope.updateResultsList();
             }
             else { //Not an error, but no results returned.  There sill not be a response.data.error.message, as this is not an error but simply just no results...
-                console.log("No results returned");
                 $("#status_text").addClass("status_text_error");
                 $("#status_text").text("Error: No results returned");
             }
             angular.element("#book_select").focus();
         }, function(response) {
-            console.dir(response);
             if (response.data.error.message.length > 0) {
                 $("#status_text").addClass("status_text_error");
                 $("#status_text").text("Error: " + response.data.error.message);
@@ -314,7 +269,6 @@ ngApp.controller('addbook', function($scope, $http, $state) {
     }
     
     $scope.updateCoverPreview = function() {
-        //console.dir($scope);
         if (!$scope.hasOwnProperty("book")) {
             console.error("Expected $scope to have property book");
             return false;
@@ -344,11 +298,7 @@ ngApp.controller('addbook', function($scope, $http, $state) {
     }
     
     $scope.updateResultsList = function() {
-        console.log("Update results list called...");
-        console.log("Clearing previous results, if any...");
         angular.element("#book_select").empty();
-        console.dir($scope);
-        console.dir($scope.searchResults);
         for (i=0; i < $scope.searchResults.items.length; i++) {
             var title = $scope.searchResults.items[i].volumeInfo.title;
             var option = document.createElement("option");
@@ -365,7 +315,6 @@ ngApp.controller('addbook', function($scope, $http, $state) {
     
     
     $scope.addBook = function() {
-        console.dir($scope);
         $scope.resultError = undefined;
         var abBtn = angular.element("#add_book_button");
         $scope.add_disabled = true; //Disable the button to prevent duplicatation...
@@ -380,12 +329,10 @@ ngApp.controller('addbook', function($scope, $http, $state) {
              data: book})
         .then(function(response) {
             if (response.data.status == "added") {
-                console.log("Book added!");
                 abBtn.removeClass("adding-button").addClass("add-success-button").text("Success!");
                 setTimeout(function() { $state.go("mybooks");}, 5000);
             }
         }, function(response) { //Error
-            console.log("At error");
             $scope.resultError = true;
             $scope.resultErrorMessage = response.data;
             window.alert("There was an error processing your request: " + response.data);
@@ -397,13 +344,11 @@ ngApp.controller('addbook', function($scope, $http, $state) {
 
 ngApp.controller('logout', function($scope, $http) {
     $scope.$on('$stateChangeSuccess', function() { 
-        console.log("%c At logout!", "color:blue; font-size:20px");
         document.location.href = "/"; //The purpose of this is to break out of the UI-Router container as the header will now be different (i.e., the Sign Out button will now be a Sign In button)
     });
 });
 
 ngApp.controller('mybooks', function($scope, $rootScope, $http) {
-    console.log("At mybooks");
     $scope.signedIn = $rootScope.signedIn;
     
     var itemsPerPage = 8;
@@ -412,14 +357,8 @@ ngApp.controller('mybooks', function($scope, $rootScope, $http) {
     $scope.error = false;
     $scope.statusMessage = "Loading books...";
     
-    $scope.testRD = function() {
-        console.log("Made it to testRD");
-    }
-    
     $scope.$on('$stateChangeSuccess', function() { 
-        console.log("%c At mybooks $sCS!", "color:blue; font-size:16px");
         var grid = angular.element("#book-grid");
-        console.log("Polling for all books...");
         
         var req = {
             method: 'POST',
@@ -429,17 +368,13 @@ ngApp.controller('mybooks', function($scope, $rootScope, $http) {
         
         $http(req).then(
             function(res) { //Success function
-                console.log("Setting pollingCompleted to true...");
-                console.dir(res);
                 $scope.pollingCompleted = true;
                 $scope.error = false;
-                //$scope.statusMessage = "should not show..."; -- Works
                 $scope.pages = res.data.pages;
                 $scope.page = res.data.page;
                 $scope.books = res.data.data;
             },
             function(res) { //Error function text is in res.data
-                console.log("At error func");
                 $scope.pollingCompleted = true;
                 $scope.error = true;
                 $scope.statusMessage = `Error returned by server: ${res.data}`;
@@ -465,8 +400,6 @@ ngApp.controller('mybooks', function($scope, $rootScope, $http) {
                 
         $http(req).then(
             function(res) {
-                console.log("at then 2");
-                console.dir(res);
                 $scope.pages = res.data.pages;
                 $scope.page = res.data.page;
                 $scope.books = res.data.data;
@@ -496,8 +429,6 @@ ngApp.controller('mybooks', function($scope, $rootScope, $http) {
                 
         $http(req).then(
             function(res) {
-                console.log("at then 2");
-                console.dir(res);
                 $scope.pages = res.data.pages;
                 $scope.page = res.data.page;
                 $scope.books = res.data.data;
@@ -513,18 +444,16 @@ ngApp.controller('mybooks', function($scope, $rootScope, $http) {
     
 });
 
-ngApp.controller('profile', function($scope, $http, $state) {
-   console.log("Inside profile controller");
+ngApp.controller('profile', function ($scope, $http, $state) {
     $scope.minNameLen = 6;
     $scope.minCityLen = 3;
     $scope.isRequired = true;
-    $scope.$on('$stateChangeSuccess', function() {
+    $scope.$on('$stateChangeSuccess', function () {
         angular.element("#status_text").text("Fetching profile information...");
         $http({
             method: 'GET',
             url: '/profileinfo'
         }).then(function successCb(res) {
-            console.dir(res);
             $scope.fullname = res.data.fullname;
             $scope.city = res.data.city;
             $scope.state = res.data.state;
@@ -533,48 +462,46 @@ ngApp.controller('profile', function($scope, $http, $state) {
             angular.element("#form_name").focus();
         }, function errorCb(res) {});
     });
-    
-    $scope.updateProfile = function() {
-        console.log("updateProfile called!");
+
+    $scope.updateProfile = function () {
         $scope.submitDisabled = true;
         var formBtn = angular.element("#form_button");
-        
-        console.dir($scope);
-        
+
         var data = {
             fullname: $scope.fullname,
-            city:     $scope.city,
-            state:    $scope.state
+            city: $scope.city,
+            state: $scope.state
         }
-        
-        
+
+
         var config = {
-            headers : {
+            headers: {
                 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
             }
         };
-        
-        angular.element("#form_button").removeClass("btn-success").addClass("btn-info").text("Updating...");
-        
-        
-        $http({method: 'POST', url: "/updateProfile", data: data})
-            .then(function(res){ 
-                console.log("at then");
-                console.dir(res);
-                if (typeof res.data.status !== "undefined" && res.data.status == "success") {
-                    angular.element("#form_button").removeClass("btn-info").addClass("btn-disabled-success").text("Success!");
-                    window.setTimeout(function() { $state.go('home'); }, 3000);    
-                }
-            },
-            function(res) { 
-                console.log("at error");
-                angular.element("#form_button").removeClass("btn-info").addClass("btn-danger").text("Error.  Please try again later.");
-                console.dir(res);
-            });
-    }
-    
-});
 
+        angular.element("#form_button").removeClass("btn-success").addClass("btn-info").text("Updating...");
+
+
+        $http({
+                method: 'POST',
+                url: "/updateProfile",
+                data: data
+            })
+            .then(function (res) {
+                    if (typeof res.data.status !== "undefined" && res.data.status == "success") {
+                        angular.element("#form_button").removeClass("btn-info").addClass("btn-disabled-success").text("Success!");
+                        window.setTimeout(function () {
+                            $state.go('home');
+                        }, 3000);
+                    }
+                },
+                function (res) {
+                    angular.element("#form_button").removeClass("btn-info").addClass("btn-danger").text("Error.  Please try again later.");
+                });
+    }
+
+});
 ngApp.directive('repeatDone', function () {
     return {
         restrict: "A", //Restricts to only Attributes
@@ -591,7 +518,6 @@ ngApp.directive('repeatDone', function () {
         */
         link: function (scope, element, attrs) {
             if (scope.$last) {
-                console.log("At scope.$last");
                 scope.$eval(attrs.repeatDone);
             }
         }
@@ -600,14 +526,11 @@ ngApp.directive('repeatDone', function () {
 
 ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
     
-    console.log("Inside trade btns ctrl");
-    
     var vm = this; //Used for relaying the trade data to the view...
     
     $scope.currentPane = null;
     
     $scope.slideToggle = function(cbFunc) {
-        console.log("Begin: $scope.currentPane is " + $scope.currentPane);
         if ($scope.requestedPane == $scope.currentPane) {
             if (typeof cbFunc == "function") {
                 $("#tradeBtnsMenu").transition({"height": 0, "padding": 0}, 2500, 'easeInOutCubic', function() {
@@ -622,7 +545,6 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
             }
         }
         else if ($scope.currentPane == null) {
-            console.log("currentPange is null");
             if (parseInt($("#tradeBtnsMenu").css("height")) == 0) {
                 if (typeof cbFunc == "function") {
                     $("#tradeBtnsMenu").transition({"height": 200, "padding": "10px"}, 2500, 'easeInOutCubic', function() {
@@ -637,7 +559,6 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
             }            
         }
         else {
-            console.log("Last ELSE");
             if (typeof cbFunc == "function") {
                 $("#tradeBtnsMenu").transition({"height": 0, "padding": 0}, 2500, 'easeInOutCubic', function() {
                     $scope.currentPane = null;
@@ -653,10 +574,7 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
     }
     
     $scope.approveTrade = function(event, trade) {
-        console.log("Accept called");
         event.target.parentElement.classList.add("ti-pending");
-        console.dir(event);
-        console.dir(trade);
         $http({
             method: "POST",
             url: '/acceptTrade',
@@ -675,15 +593,12 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
                 $rootScope.updateTradeBtns();
             }
         }, function errorCb(res) {
-            console.dir(res);
+            //console.dir(res);
         })
     }
     
     $scope.declineTrade = function(event, trade) {
-        console.log("Decline called");
         event.target.parentElement.classList.add("ti-pending");
-        console.dir(event);
-        console.dir(trade);
         $http({
             method: "POST",
             url: '/declineTrade',
@@ -691,10 +606,8 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
                 id: trade._id
             }
         }).then(function successCb(res) {
-            console.dir(res)
             if (res.data.hasOwnProperty("result") && res.data.result == "success") {
                 angular.element(event.target.parentElement).remove();
-                console.log($scope.currentPane + " is the current pane");
                 if ($scope.currentPane == "showReqsForMe") {
                     $rootScope.$emit("UpdateReqsForMe")
                 }
@@ -704,7 +617,6 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
                 $rootScope.$emit("UpdateTradeButtons", {});
             }
         }, function errorCb(res) {
-            console.dir(res);
         })
         event.target.parentElement.classList.add("ti-pending");
     }
@@ -716,7 +628,6 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
     }
     
     $scope.showMyTradeReqs = function() {
-        console.log("At sMTR");
         $scope.requestedPane = "showMyTradeReqs";
         if ($scope.currentPane == null) {
             $scope.slideToggle();
@@ -738,7 +649,6 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
             method: "GET",
             url: '/getTradeReqsForMe'
         }).then(function successCb(res) {
-            console.dir(res);
             $scope.trades = res.data;
         }, function errorCb(res) {})
     }        
@@ -749,13 +659,11 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
             method: "GET",
             url: '/getMyTradeReqs'
         }).then(function successCb(res) {
-            console.dir(res);
             $scope.trades = res.data;
         }, function errorCb(res) {})
     }
     
     $scope.showReqsForMe = function() {
-        console.log("At sRFM");
         $scope.requestedPane = "showReqsForMe";
         if ($scope.currentPane == null) {
             $scope.slideToggle();
@@ -795,36 +703,29 @@ ngApp.controller('TradeBtnsCtrl', function($scope, $http, $rootScope) {
     }
     
     $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
-        console.log("Updating trade buttons with pending trade counts...");
         $rootScope.updateTradeBtns();   
     });
     
     $rootScope.$on("UpdateTradeButtons", function() {
-        console.log("Received UTB broadcast")
         $scope.updateTradeBtns();
     })
     
     $rootScope.$on("UpdateMyTradeReqs", function() {
-        console.log("Received UMTR broadcast");
         $scope.queryMyTrades();
     })
     
     $rootScope.$on("UpdateReqsForMe", function() {
-        console.log("Received URFM broadcast");
         $scope.queryReqsForMe();
     })
     
     //$rootScope because areas outside of this controller will call it
     $rootScope.updateTradeBtns = function() {
-        console.log("Update Trade Buttons called.");
         var req = {
             method: 'GET',
             url: "getNTrades"
         };
         $http(req).then(
             function(res) {
-                console.log("at http res")
-                console.dir(res);
                 if (res.data.hasOwnProperty("nReqsForYou")) {
                     $rootScope.nReqsForMe = `(${res.data.nReqsForYou})`;
                 }
@@ -843,11 +744,8 @@ $(function() { //Document ready
     //Also works when an elements acceskey is used (instead of click)
     $(".navbar-nav>li>a").click(function(event) {
         if (event.clientX == 0 && event.clientY == 0) { //Keyboard was used instead of mouse (as clientX & Y is the mouse's position)
-            //console.dir(event);
             $(event.target.parentElement).addClass("navKbSelect");
             $(event.target.parentElement).one("webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend", function(event) {
-                //console.log("Animation ended...");
-                //console.dir(event);
                 $(event.target).removeClass("navKbSelect");
             });     
         }
